@@ -153,7 +153,8 @@ public class MM_LoadingZoneRed extends LinearOpMode {
                 break;
             case 2:
                 // Drive to quarry
-                robot.driveForwardDistance(17, speed, this);
+                // NC Changed distance from 17 to 13
+                robot.driveForwardDistance(13, speed, this);
                 Thread.sleep(500);
                 switch (skystonePos) {
                     case LEFT:
@@ -183,11 +184,14 @@ public class MM_LoadingZoneRed extends LinearOpMode {
                 robot.grabBlockAuto();
                 this.stepNumber++;
                 break;
+
             case 4:
                 // back up
                 robot.driveForwardDistance(8, -speed, this);
                 // turn towards skybridge
                 robot.turnRight(speed, 1075);
+                // NC put gripper back to 0.5 position after picking the block up
+                robot.rotateGripper(0.5);
                 // drive to skybridge
                 robot.driveForwardDistance(distanceToFoundation + distanceToBuildZone, speed, this);
                 this.stepNumber++;

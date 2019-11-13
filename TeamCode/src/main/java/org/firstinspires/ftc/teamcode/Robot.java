@@ -266,7 +266,8 @@ public class Robot {
     void bringArmDown(OpMode opmode) {
         if (armPos == armPosition.REST) { // we only bring the arm down if the arm is resting
             // we rotate the arm 180 + ANGLE_OF_GRIPPER_WHEN_GRABBING degrees
-            this.moveArmRotate(this.TORQUENADO60TICKS_PER_REV * 4 * (145) / 360, 0.7, opmode);
+            // NC changed to 175 instead of 145
+            this.moveArmRotate(this.TORQUENADO60TICKS_PER_REV * 4 * (175) / 360, 0.7, opmode);
             this.stopArmRotate();
             this.armPos = armPosition.ACTIVE;
         }
@@ -279,7 +280,8 @@ public class Robot {
                 this.rotateGripper(0.5);
             }
             // we rotate the arm 225 degrees
-            this.moveArmRotate(this.TORQUENADO60TICKS_PER_REV * 4 * (145) / 360, -0.7, opmode);
+            // NC changed to 175 instead of 145
+            this.moveArmRotate(this.TORQUENADO60TICKS_PER_REV * 4 * (175) / 360, -0.7, opmode);
             this.stopArmRotate();
             this.armPos = armPosition.REST;
         }
@@ -366,11 +368,11 @@ public class Robot {
             opmode.telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
             opmode.telemetry.update();
             Thread.sleep(50);
-        }
+}
         opmode.telemetry.log().clear(); opmode.telemetry.log().add("Gyro Calibrated. Press Start.");
-        opmode.telemetry.clear(); opmode.telemetry.update();
+                opmode.telemetry.clear(); opmode.telemetry.update();
 
-    }
+                }
 
     double getAngle() {
         Orientation angles = navxMicro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
