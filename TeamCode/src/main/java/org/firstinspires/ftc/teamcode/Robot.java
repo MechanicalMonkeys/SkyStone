@@ -474,5 +474,31 @@ public class Robot {
         double angleToTurn = angle - this.getHeading();
         this.turnWithImu(power, angleToTurn, opmode);
     }
+
+    void driveUntilColor(String mode, double power, String color, OpMode opmode) {
+        switch(mode) {
+            case "strafe":
+                this.setStrafe(power);
+                break;
+            case "drive":
+                this.setDrivePower(power);
+                break;
+        }
+
+        switch(color) {
+            case "red":
+                while(this.leftColor.red() < 150) {
+                    opmode.telemetry.addData("Red", this.leftColor.red());
+                    opmode.telemetry.update();
+                }
+                break;
+            case "blue":
+                while(this.leftColor.blue() < 150) {
+                    opmode.telemetry.addData("Blue", this.leftColor.blue());
+                    opmode.telemetry.update();
+                }
+        }
+        this.stopDrive();
+    }
 }
 
