@@ -103,13 +103,13 @@ public class Robot {
         hwMap = opmode.hardwareMap;
 
         // Motor mapping
-        this.rearLeft = hwMap.dcMotor.get("rearLeft");
-        this.frontLeft = hwMap.dcMotor.get("frontLeft");
-        this.rearRight = hwMap.dcMotor.get("rearRight");
-        this.frontRight = hwMap.dcMotor.get("frontRight");
-        this.waffleMover = hwMap.dcMotor.get("waffleMover");
-        this.armRotate = hwMap.dcMotor.get("armRotate");
-        this.liftMotor = hwMap.dcMotor.get("liftMotor");
+        this.rearLeft = hwMap.get(DcMotor.class, "rearLeft");
+        this.frontLeft = hwMap.get(DcMotor.class, "frontLeft");
+        this.rearRight = hwMap.get(DcMotor.class, "rearRight");
+        this.frontRight = hwMap.get(DcMotor.class, "frontRight");
+        this.waffleMover = hwMap.get(DcMotor.class, "waffleMover");
+        this.armRotate = hwMap.get(DcMotor.class, "armRotate");
+        this.liftMotor = hwMap.get(DcMotor.class, "liftMotor");
 
         // Drive Motor Direction
         this.rearLeft.setDirection(DcMotor.Direction.FORWARD);
