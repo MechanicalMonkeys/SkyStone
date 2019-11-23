@@ -7,6 +7,7 @@ public class MM_BuildingZoneTemplate {
     private ParkingPosition parkingPos;
     enum AllianceColor {RED, BLUE} // color of alliance
     private AllianceColor allianceColor;
+    private String stringColor;
     private int colorCoefficient;
     private double speed = 0.4;
     private LinearOpMode opmode;
@@ -17,6 +18,14 @@ public class MM_BuildingZoneTemplate {
         this.robot = robot;
         this.parkingPos = parkingPos;
         this.allianceColor = color;
+        switch(this.allianceColor) {
+            case BLUE:
+                this.stringColor = "blue";
+                break;
+            case RED:
+                this.stringColor = "red";
+                break;
+        }
         switch(this.allianceColor) {
             case BLUE:
                 this.colorCoefficient = 1;
@@ -42,7 +51,7 @@ public class MM_BuildingZoneTemplate {
         robot.moveWaffleMover();
         robot.driveForwardDistance(34, 0.25, opmode);
         robot.moveWaffleMover();
-        robot.driveUntilColor("strafe", -speed * colorCoefficient, "blue", opmode);
+        robot.driveUntilColor("strafe", -speed * colorCoefficient, this.stringColor, opmode);
         if (parkingPos == ParkingPosition.CLOSE) {
             robot.driveForwardDistance(22, -0.4, opmode);
         }
