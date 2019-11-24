@@ -158,14 +158,7 @@ public class MM_LoadingZoneBlueCLOSE extends LinearOpMode {
                 if (robot.frontDistance.getDistance(DistanceUnit.INCH) == 0.0) {
                     this.driveWithoutDistanceSensor();
                 } else {
-                    robot.setDrivePower(0.25);
-                    double distanceToBlock = robot.frontDistance.getDistance(DistanceUnit.INCH);
-                    while (distanceToBlock > 15) {
-                        telemetry.addData("Distance", robot.frontDistance.getDistance(DistanceUnit.INCH));
-                        telemetry.update();
-                        distanceToBlock = robot.frontDistance.getDistance(DistanceUnit.INCH);
-                    }
-                    robot.stopDrive();
+                    robot.driveWithDistanceSensor(15, 0.25, robot.frontDistance, this);
                 }
                 this.stepNumber++;
                 break;
@@ -251,7 +244,7 @@ public class MM_LoadingZoneBlueCLOSE extends LinearOpMode {
                     distanceToBlock2 = robot.frontDistance.getDistance(DistanceUnit.INCH);
                 }
                 robot.stopDrive();*/
-                robot.driveForwardDistance(8, 0.25, this);
+                robot.driveWithDistanceSensor(15, 0.25, robot.frontDistance, this);
                 this.stepNumber++;
                 break;
             case 8:

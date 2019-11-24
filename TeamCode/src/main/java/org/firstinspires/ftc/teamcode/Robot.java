@@ -215,7 +215,7 @@ public class Robot {
 
     }
 
-    void driveWithDIstanceSensor(double distanceForSensor, double power, DistanceSensor distanceSensor, OpMode opmode) {
+    void driveWithDistanceSensor(double distanceForSensor, double power, DistanceSensor distanceSensor, OpMode opmode) {
         this.setDrivePower(power);
         double distanceToBlock = distanceSensor.getDistance(DistanceUnit.INCH);
         while (distanceToBlock > 15) {
@@ -245,10 +245,7 @@ public class Robot {
         while (timer.time(TimeUnit.MILLISECONDS) < milliseconds) {
             double currentAngle = this.getHeading();
             double error = Math.tanh((currentAngle - targetAngle) / 20); // we have to constrain the error between -1 and 1
-            this.frontLeft.setPower(power + error);
-            this.frontRight.setPower(-power - error);
-            this.rearLeft.setPower(-power - error);
-            this.rearRight.setPower(power + error);
+            this.setStrafe(power + error);
         }
         this.stopDrive();
     }
