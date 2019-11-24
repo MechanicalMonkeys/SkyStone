@@ -1,32 +1,23 @@
 package org.firstinspires.ftc.teamcode;
 
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-import java.util.concurrent.TimeUnit;
-
 // THIS IS NOT AN OPMODE - IT IS A DEFINING CLASS
-public class Robot {
 
-    // armRotate encoder count: -3650
+public class Robot {
 
     // Motors
     public DcMotor rearLeft;
@@ -45,11 +36,6 @@ public class Robot {
     // Sensors
     IntegratingGyroscope gyro;
     NavxMicroNavigationSensor navxMicro;
-    BNO055IMU imu;
-
-    DistanceSensor frontDistance, leftDistance, rightDistance, rearDistance;
-    ColorSensor leftColor, insideColor;
-    TouchSensor rearTouch;
 
     // Vuforia
     WebcamTest detector;
@@ -86,10 +72,7 @@ public class Robot {
     private gripperPosition gripperPos = gripperPosition.OPEN;
 
     public enum armPosition {REST, ACTIVE}
-    public armPosition armPos = armPosition.REST;
-    Orientation angles;
-
-
+    public armPosition armPos = armPosition.REST; // will change back to REST later
 
     private HardwareMap hwMap = null;
 
@@ -103,13 +86,13 @@ public class Robot {
         hwMap = opmode.hardwareMap;
 
         // Motor mapping
-        this.rearLeft = hwMap.get(DcMotor.class, "rearLeft");
-        this.frontLeft = hwMap.get(DcMotor.class, "frontLeft");
-        this.rearRight = hwMap.get(DcMotor.class, "rearRight");
-        this.frontRight = hwMap.get(DcMotor.class, "frontRight");
-        this.waffleMover = hwMap.get(DcMotor.class, "waffleMover");
-        this.armRotate = hwMap.get(DcMotor.class, "armRotate");
-        this.liftMotor = hwMap.get(DcMotor.class, "liftMotor");
+        this.rearLeft = hwMap.dcMotor.get("rearLeft");
+        this.frontLeft = hwMap.dcMotor.get("frontLeft");
+        this.rearRight = hwMap.dcMotor.get("rearRight");
+        this.frontRight = hwMap.dcMotor.get("frontRight");
+        this.waffleMover = hwMap.dcMotor.get("waffleMover");
+        this.armRotate = hwMap.dcMotor.get("armRotate");
+        this.liftMotor = hwMap.dcMotor.get("liftMotor");
 
         // Drive Motor Direction
         this.rearLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -120,10 +103,6 @@ public class Robot {
         this.armRotate.setDirection(DcMotor.Direction.REVERSE); // positive makes arm go forward
         this.liftMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        // Motor encoder reset
-        this.armRotate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.armRotate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         // set motor powers to 0 so they don't cause problems
         this.stopDrive();
         this.waffleMover.setPower(0);
@@ -132,25 +111,13 @@ public class Robot {
 
         // Servo mapping
         this.gripperRotateServo1 = hwMap.get(Servo.class, "gripperRotateServo1");
+        this.gripperRotateServo2 = hwMap.get(Servo.class, "gripperRotateServo2");
         this.grabServo = hwMap.get(Servo.class, "grabServo");
 
         // Servo direction
         this.gripperRotateServo1.setDirection(Servo.Direction.FORWARD);
+        this.gripperRotateServo2.setDirection(Servo.Direction.REVERSE);
         this.grabServo.setDirection(Servo.Direction.FORWARD);
-
-        // Sensor init
-        this.frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
-        this.leftDistance = hwMap.get(DistanceSensor.class, "leftDistance");
-        this.rightDistance = hwMap.get(DistanceSensor.class, "rightDistance");
-        this.rearDistance = hwMap.get(DistanceSensor.class, "rearDistance");
-
-        this.leftColor = hwMap.get(ColorSensor.class, "leftColor");
-        this.insideColor = hwMap.get(ColorSensor.class, "insideColor");
-
-        this.rearTouch = hwMap.get(TouchSensor.class, "rearTouch");
-
-        // init imu
-        this.initImu();
 
         // Vuforia init
         detector = new WebcamTest();
@@ -185,7 +152,6 @@ public class Robot {
 
     void driveForwardDistance(double distance, double power, LinearOpMode opmode) { // make power negative to go backwards
         /* drives forward a certain distance(in) using encoders */
-        double targetAngle = this.getHeading();
 
         // calculate ticks
         long NUM_TICKS_LONG = StrictMath.round(this.TICKS_PER_INCH * distance);
@@ -197,33 +163,24 @@ public class Robot {
         // set mode
         this.setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        // set power
+        this.setDrivePower(power);
+
         // drive
         while (opmode.opModeIsActive() && Math.abs(this.rearLeft.getCurrentPosition()) < NUM_TICKS && Math.abs(this.frontLeft.getCurrentPosition()) < NUM_TICKS
         && Math.abs(this.rearRight.getCurrentPosition()) < NUM_TICKS && Math.abs(this.frontRight.getCurrentPosition()) < NUM_TICKS) {
-            double currentAngle = this.getHeading();
-            double error = Math.tanh((currentAngle - targetAngle) / 40);
-            this.frontLeft.setPower(power + error);
-            this.frontRight.setPower(power - error);
-            this.rearLeft.setPower(power + error);
-            this.rearRight.setPower(power - error);
-            opmode.telemetry.addData("Angle of Robot", currentAngle);
+            // wait until target position is reached
+            opmode.telemetry.addData("Target Position", NUM_TICKS);
+            opmode.telemetry.addData("Rear Left", this.rearLeft.getCurrentPosition());
+            opmode.telemetry.addData("Rear Right", this.rearRight.getCurrentPosition());
+            opmode.telemetry.addData("Front Left", this.frontLeft.getCurrentPosition());
+            opmode.telemetry.addData("Front Right", this.frontRight.getCurrentPosition());
             opmode.telemetry.update();
         }
 
         // stop driving
         this.stopDrive();
 
-    }
-
-    void driveWithDistanceSensor(double distanceForSensor, double power, DistanceSensor distanceSensor, OpMode opmode) {
-        this.setDrivePower(power);
-        double distanceToBlock = distanceSensor.getDistance(DistanceUnit.INCH);
-        while (distanceToBlock > 15) {
-            opmode.telemetry.addData("Distance", distanceToBlock);
-            opmode.telemetry.update();
-            distanceToBlock = distanceSensor.getDistance(DistanceUnit.INCH);
-        }
-        this.stopDrive();
     }
 
     void setStrafe(double power) {
@@ -239,14 +196,8 @@ public class Robot {
 
     void strafeTime(double power, long milliseconds) throws InterruptedException {
         /* strafes for a certain amount of milliseconds */
-        double targetAngle = this.getHeading(); // you want to stay at this angle the whole time
-        ElapsedTime timer = new ElapsedTime();
-        timer.reset();
-        while (timer.time(TimeUnit.MILLISECONDS) < milliseconds) {
-            double currentAngle = this.getHeading();
-            double error = Math.tanh((currentAngle - targetAngle) / 20); // we have to constrain the error between -1 and 1
-            this.setStrafe(power + error);
-        }
+        this.setStrafe(power);
+        Thread.sleep(milliseconds);
         this.stopDrive();
     }
 
@@ -260,22 +211,6 @@ public class Robot {
         this.stopDrive();
     }
 
-    void turnWithImu(double power, double angle, OpMode opmode) {
-        double currentAngle = this.getHeading();
-        double targetAngle = currentAngle + angle;
-        double sign = Math.signum(angle);
-        this.rearLeft.setPower(-power * sign);
-        this.frontLeft.setPower(-power * sign);
-        this.rearRight.setPower(power * sign);
-        this.frontRight.setPower(power * sign);
-        while (currentAngle * sign <= targetAngle * sign) {
-            currentAngle = this.getHeading();
-            opmode.telemetry.addData("Angle of Robot", currentAngle);
-            opmode.telemetry.update();
-        }
-        this.stopDrive();
-    }
-
     void moveWaffleMover() throws InterruptedException {
         this.waffleMover.setPower(this.wafflePower * this.wafflePosition);
         Thread.sleep(600);
@@ -284,8 +219,6 @@ public class Robot {
     }
 
     private void moveArmRotate(int targetPosition, double power, OpMode opmode) {
-        double sign = Math.signum(targetPosition);
-
         // reset encoders
         this.armRotate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -295,9 +228,16 @@ public class Robot {
         // set power
         this.setArmRotatePower(power);
 
+        // PID parameters
+        PIDWrist.setSetpoint(targetPosition);
+        PIDWrist.setOutputRange(0, 0.5);
+        PIDWrist.setInputRange(0, 500);
+        PIDWrist.enable();
+
         long timestart = System.nanoTime() / 1000000000;
         // wait for the armRotate motors to reach the position or else things go bad bad
-        while (this.armRotate.getCurrentPosition() * sign <  targetPosition * sign) {
+        while (Math.abs(this.armRotate.getCurrentPosition()) <  targetPosition) {
+
             // if it takes more than 2 seconds, something is wrong so we exit the loop
             if (System.nanoTime() / 1000000000 - timestart > 10) {
                 opmode.telemetry.addData("Error", "Gripper movement took too long");
@@ -305,9 +245,14 @@ public class Robot {
                 break;
             }
 
-            opmode.telemetry.addData("Gripper", targetPosition + " " + this.armRotate.getCurrentPosition());
+            double correction1 = PIDWrist.performPID(Math.abs(this.armRotate.getCurrentPosition()));
+
+            this.armRotate.setPower(this.armRotate.getPower() + correction1);
+            opmode.telemetry.addData("Gripper Target", targetPosition);
             opmode.telemetry.update();
         }
+
+        PIDWrist.reset();
 
         // stop the armRotate motors
         this.stopArmRotate();
@@ -321,7 +266,8 @@ public class Robot {
     void bringArmDown(OpMode opmode) {
         if (armPos == armPosition.REST) { // we only bring the arm down if the arm is resting
             // we rotate the arm 180 + ANGLE_OF_GRIPPER_WHEN_GRABBING degrees
-            this.moveArmRotate(-3100, 0.6, opmode);
+            // NC changed to 175 instead of 145
+            this.moveArmRotate(this.TORQUENADO60TICKS_PER_REV * 4 * (175) / 360, 0.7, opmode);
             this.stopArmRotate();
             this.armPos = armPosition.ACTIVE;
         }
@@ -334,7 +280,9 @@ public class Robot {
                 this.rotateGripper(0.5);
             }
             // we rotate the arm 225 degrees
-            this.moveArmRotate(3100, -0.6, opmode);
+            // NC changed to 175 instead of 145
+            this.moveArmRotate(this.TORQUENADO60TICKS_PER_REV * 4 * (175) / 360, -0.7, opmode);
+            this.stopArmRotate();
             this.armPos = armPosition.REST;
         }
     }
@@ -377,7 +325,7 @@ public class Robot {
     void stopArmRotate() { this.setArmRotatePower(0); }
 
     String getInfo() {
-        String output = "Arm Position: " + this.armRotate.getCurrentPosition() + "\nWaffle Position: ";
+        String output = "Arm Position: " + this.armPos + "\nWaffle Position: ";
         if (this.wafflePosition == -1) {
             output += "Down\nWrist Position: ";
         } else {
@@ -391,8 +339,6 @@ public class Robot {
         }
 
         output += this.gripperPos;
-
-        output += "\nRobot Angle: " + this.getHeading();
 
         return output;
     }
@@ -410,7 +356,7 @@ public class Robot {
         // on this object to illustrate which interfaces support which functionality.
         navxMicro = opmode.hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
         gyro = (IntegratingGyroscope)navxMicro;
-        // If you're only interested in the IntegratingGyroscope interface, the following will suffice.
+        // If you're only interested int the IntegratingGyroscope interface, the following will suffice.
         // gyro = hardwareMap.get(IntegratingGyroscope.class, "navx");
 
         // The gyro automatically starts calibrating. This takes a few seconds.
@@ -419,17 +365,17 @@ public class Robot {
         // Wait until the gyro calibration is complete
         timer.reset();
         while (navxMicro.isCalibrating())  {
-            opmode.telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|" : "-");
+            opmode.telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
             opmode.telemetry.update();
             Thread.sleep(50);
-        }
+}
         opmode.telemetry.log().clear(); opmode.telemetry.log().add("Gyro Calibrated. Press Start.");
-        opmode.telemetry.clear(); opmode.telemetry.update();
+                opmode.telemetry.clear(); opmode.telemetry.update();
 
-    }
+                }
 
     double getAngle() {
-        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        Orientation angles = navxMicro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angles.firstAngle;
     }
 
@@ -439,7 +385,7 @@ public class Robot {
         Thread.sleep(500);
         this.gripBlock();
         Thread.sleep(500);
-        this.rotateGripper(0.8);
+        this.rotateGripper(1);
     }
 
     void stopEverything() {
@@ -447,55 +393,4 @@ public class Robot {
         this.stopArmRotate();
         this.stopLift();
     }
-
-    void initImu() {
-        // imu init
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        this.imu = hwMap.get(BNO055IMU.class, "imu");
-        this.imu.initialize(parameters);
-    }
-
-    double getHeading() {
-        // get angles
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        return angles.firstAngle;
-    }
-
-    void turnToGlobalPosition(double power, double angle, OpMode opmode) {
-        double angleToTurn = angle - this.getHeading();
-        this.turnWithImu(power, angleToTurn, opmode);
-    }
-
-    void driveUntilColor(String mode, double power, String color, OpMode opmode) {
-        switch(mode) {
-            case "strafe":
-                this.setStrafe(power);
-                break;
-            case "drive":
-                this.setDrivePower(power);
-                break;
-        }
-
-        switch(color) {
-            case "red":
-                while(this.leftColor.red() < 150) {
-                    opmode.telemetry.addData("Red", this.leftColor.red());
-                    opmode.telemetry.update();
-                }
-                break;
-            case "blue":
-                while(this.leftColor.blue() < 150) {
-                    opmode.telemetry.addData("Blue", this.leftColor.blue());
-                    opmode.telemetry.update();
-                }
-        }
-        this.stopDrive();
-    }
 }
-
