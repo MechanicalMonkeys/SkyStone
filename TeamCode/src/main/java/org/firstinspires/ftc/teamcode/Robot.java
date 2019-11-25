@@ -480,6 +480,8 @@ public class Robot {
             case "drive":
                 this.setDrivePower(power);
                 break;
+            default:
+                return;
         }
 
         switch(color) {

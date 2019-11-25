@@ -206,7 +206,7 @@ public class MM_LoadingZoneTemplate {
             case 10:
                 // park
                 Thread.sleep(500);
-                robot.driveForwardDistance(10, -0.6, this.opmode);
+                robot.driveUntilColor("drive", -0.6, this.stringColor, this.opmode);
                 switch(this.parkingPos) {
                     case FAR:
                         robot.strafeTime(speed, 2800);
