@@ -17,7 +17,7 @@ public class DriveHalo extends OpMode {
     private boolean armClosed = false;
     boolean slowMode = false; // activate slowMode if both joysticks are pushed down
     boolean strafeMode = false;
-    Boolean[] buttons = new Boolean[7];
+    Boolean[] buttons = new Boolean[8];
     double wristPosition = 0.5;
 
     @Override
@@ -45,6 +45,7 @@ public class DriveHalo extends OpMode {
         this.gripperController();
         this.liftController();
         this.waffleController();
+        this.homeButton();
         telemetry.addData("Robot Info: ", robot.getInfo());
         telemetry.update();
     }
@@ -95,10 +96,10 @@ public class DriveHalo extends OpMode {
 
     void wristController() {
         if (gamepad2.right_stick_y != 0) {
-            this.wristPosition -= 0.001 * gamepad2.right_stick_y;
+            this.wristPosition -= 0.01 * gamepad2.right_stick_y;
             robot.rotateGripper(this.wristPosition);
         } else if (gamepad2.b && !buttons[6]) {
-            robot.toggleArmRotate();
+            robot.toggleWrist();
         }
         buttons[6] = gamepad2.b;
 
@@ -138,5 +139,16 @@ public class DriveHalo extends OpMode {
             robot.rearRight.setPower(rightPower);
             robot.frontRight.setPower(rightPower);
         }
+    }
+
+    void homeButton() {
+        if (gamepad2.left_bumper && gamepad2.right_bumper && !buttons[7]) {
+            try {
+                robot.goToHome(this);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        buttons[7] =  gamepad2.left_bumper && gamepad2.right_bumper;
     }
 }

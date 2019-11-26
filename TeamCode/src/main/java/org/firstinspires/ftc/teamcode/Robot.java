@@ -80,7 +80,7 @@ public class Robot {
     private int wafflePosition = -1; // 1 = Up, -1 = Down Waffle mover starts down
     private double wafflePower = 0.5;
 
-    private double gripperRotatePosition = 0.8; // 0.8 = at a 90 degree angle, 0.5 = parallel to ground
+    private double gripperRotatePosition = 1.0; // 1.0 = at a 90 degree angle, 0.8 = parallel to ground
 
     private enum gripperPosition {OPEN, CLOSED}
     private gripperPosition gripperPos = gripperPosition.OPEN;
@@ -321,7 +321,7 @@ public class Robot {
     void bringArmDown(OpMode opmode) {
         if (armPos == armPosition.REST) { // we only bring the arm down if the arm is resting
             // we rotate the arm 180 + ANGLE_OF_GRIPPER_WHEN_GRABBING degrees
-            this.moveArmRotate(-3100, 0.6, opmode);
+            this.moveArmRotate(-3800, 0.6, opmode);
             this.stopArmRotate();
             this.armPos = armPosition.ACTIVE;
         }
@@ -384,11 +384,7 @@ public class Robot {
             output += "Up\nWrist Position: ";
         }
 
-        if (this.gripperRotatePosition == 1) {
-            output += "Up\nGripper Position: ";
-        } else {
-            output += "Down\nGripper Position: ";
-        }
+        output += this.gripperRotateServo1.getPosition() + "\nGripper Position: ";
 
         output += this.gripperPos;
 
@@ -397,9 +393,9 @@ public class Robot {
         return output;
     }
 
-    void toggleArmRotate() {
+    void toggleWrist() {
         this.rotateGripper(this.gripperRotatePosition);
-        this.gripperRotatePosition = 1.3 - this.gripperRotatePosition;
+        this.gripperRotatePosition = 1.8 - this.gripperRotatePosition;
     }
 
     void initNavXGyro(OpMode opmode) throws InterruptedException {
@@ -435,11 +431,11 @@ public class Robot {
 
     void grabBlockAuto() throws InterruptedException {
         // grab block
-        this.rotateGripper(0.5);
+        this.rotateGripper(0.8);
         Thread.sleep(500);
         this.gripBlock();
         Thread.sleep(500);
-        this.rotateGripper(0.8);
+        this.rotateGripper(1.0);
     }
 
     void stopEverything() {
@@ -483,7 +479,8 @@ public class Robot {
             default:
                 return;
         }
-
+        ElapsedTime timer = new ElapsedTime();
+        timer.reset();
         switch(color) {
             case "red":
                 while(this.leftColor.red() < 150) {
@@ -498,6 +495,14 @@ public class Robot {
                 }
         }
         this.stopDrive();
+    }
+
+    void goToHome(OpMode opmode) throws InterruptedException {
+        this.rotateGripper(1.0);
+        this.moveArmRotate(-1500, 0.5, opmode);
+        this.liftDown();
+        Thread.sleep(3000);
+        this.stopLift();
     }
 }
 
