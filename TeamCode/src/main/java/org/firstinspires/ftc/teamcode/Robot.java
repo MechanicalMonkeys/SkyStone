@@ -488,13 +488,13 @@ public class Robot {
         switch(color) {
             case "red":
                 while(this.leftColor.red() < 150) {
-                    opmode.telemetry.addData("Red", this.leftColor.red());
+                    opmode.telemetry.addData("Red", this.insideColor.red());
                     opmode.telemetry.update();
                 }
                 break;
             case "blue":
                 while(this.leftColor.blue() < 150) {
-                    opmode.telemetry.addData("Blue", this.leftColor.blue());
+                    opmode.telemetry.addData("Blue", this.insideColor.blue());
                     opmode.telemetry.update();
                 }
         }
