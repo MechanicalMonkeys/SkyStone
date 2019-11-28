@@ -50,7 +50,7 @@ public class Robot {
 
     DistanceSensor frontDistance, leftDistance, rightDistance, rearDistance;
     ModernRoboticsI2cRangeSensor leftRange, frontRange;
-    ColorSensor leftColor, insideColor;
+    ColorSensor insideColor;
     TouchSensor rearTouch;
 
     // Vuforia
@@ -150,7 +150,7 @@ public class Robot {
 
 
         //this.leftColor = hwMap.get(ColorSensor.class, "leftColor");
-        //this.insideColor = hwMap.get(ColorSensor.class, "insideColor");
+        this.insideColor = hwMap.get(ColorSensor.class, "insideColor");
 
         this.rearTouch = hwMap.get(TouchSensor.class, "rearTouch");
 
@@ -249,9 +249,9 @@ public class Robot {
         timer.reset();
         while (timer.time(TimeUnit.MILLISECONDS) < milliseconds) {
             double currentAngle = this.getHeading();
-            double error = Math.tanh((currentAngle - targetAngle) / 20); // we have to constrain the error between -1 and 1
+            double error = Math.tanh((currentAngle - targetAngle) / 30); // we have to constrain the error between -1 and 1
             this.rearLeft.setPower(-power + error);
-            this.frontLeft.setPower(power + error);
+            this.frontLeft.setPower(-power + error);
             this.rearRight.setPower(power - error);
             this.frontRight.setPower(power - error);
         }
@@ -492,13 +492,13 @@ public class Robot {
         timer.reset();
         switch(color) {
             case "red":
-                while(this.leftColor.red() < 150) {
+                while(this.insideColor.red() < 150) {
                     opmode.telemetry.addData("Red", this.insideColor.red());
                     opmode.telemetry.update();
                 }
                 break;
             case "blue":
-                while(this.leftColor.blue() < 150) {
+                while(this.insideColor.blue() < 150) {
                     opmode.telemetry.addData("Blue", this.insideColor.blue());
                     opmode.telemetry.update();
                 }

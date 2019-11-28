@@ -88,7 +88,7 @@ public class MM_LoadingZoneTemplate {
         } catch (InterruptedException e) {
             //Thread.currentThread().interrupt();
         } finally {
-            this.onRobotStopOrInterrupt();
+            //this.onRobotStopOrInterrupt();
         }
     }
 
@@ -116,23 +116,23 @@ public class MM_LoadingZoneTemplate {
                 // put arm down
                 robot.bringArmDown(this.opmode);
                 robot.rotateGripper(1.0);
-                Thread.sleep(500);
+                Thread.sleep(250);
                 switch (skystonePos) {
                     case LEFT:
                         distanceToBuildZone = 30 - colorCoefficient * 6;
                         // strafe to block
-                        robot.strafeTime(-0.25, 1500);
+                        robot.strafeTime(-0.3, 1500);
                         // correct for the strafe
                         //robot.turnRight(-0.25, 250);
                         break;
                     case CENTER:
                         distanceToBuildZone = 30;
-                        robot.strafeTime(-0.25, 250);
+                        robot.strafeTime(-0.3, 250);
                         break;
                     case RIGHT:
                         distanceToBuildZone = 30 + colorCoefficient * 6;
                         // strafe to block
-                        robot.strafeTime(0.25, 1250);
+                        robot.strafeTime(0.3, 1250);
                         // correct for the strafe
                         //robot.turnRight(-0.25, 250);
                         break;
@@ -141,31 +141,31 @@ public class MM_LoadingZoneTemplate {
                 this.stepNumber++;
                 break;
             case 3:
-                Thread.sleep(500);
+                Thread.sleep(250);
                 robot.grabBlockAuto();
                 this.stepNumber++;
                 break;
             case 4:
                 // back up
-                robot.driveForwardDistance(8, -speed, this.opmode);
+                robot.driveForwardDistance(12, -speed, this.opmode);
                 // turn towards skybridge
-                robot.turnWithImu(0.25, 90 * colorCoefficient, this.opmode);
+                robot.turnWithImu(0.3, 90 * colorCoefficient, this.opmode);
                 // drive to foundation
-                robot.driveForwardDistance(distanceToFoundation + distanceToBuildZone - 12, speed, this.opmode);
+                robot.driveForwardDistance(distanceToFoundation + distanceToBuildZone - 24, speed, this.opmode);
                 this.stepNumber++;
                 break;
             case 5:
-                Thread.sleep(500);
+                Thread.sleep(250);
                 // drop block
                 robot.releaseBlock(this.opmode);
                 this.stepNumber++;
                 break;
             case 6:
-                Thread.sleep(500);
+                Thread.sleep(250);
                 // correct position - obviously its in the code
                 robot.turnToGlobalPosition(0.25, 90 * colorCoefficient, this.opmode);
                 // drive to second Skystone
-                robot.driveForwardDistance(distanceToBuildZone + distanceToFoundation + 24, -speed, this.opmode);
+                robot.driveForwardDistance(distanceToBuildZone + distanceToFoundation + 12, -speed, this.opmode);
                 // turn
                 robot.turnToGlobalPosition(0.25, 0, this.opmode);
                 this.stepNumber++;
@@ -177,23 +177,23 @@ public class MM_LoadingZoneTemplate {
                 break;
             case 8:
                 // grab block
-                Thread.sleep(500);
+                Thread.sleep(250);
                 robot.grabBlockAuto();
                 this.stepNumber++;
                 break;
             case 9:
                 // drive to foundation to drop the block off -  aight bruh im bouta head out now
-                Thread.sleep(500);
+                Thread.sleep(250);
                 robot.driveForwardDistance(15, -speed, this.opmode);
                 robot.turnWithImu(0.3, 90 * colorCoefficient, this.opmode);
-                robot.driveForwardDistance(distanceToBuildZone + distanceToFoundation + 18, speed, this.opmode);
+                robot.driveForwardDistance(distanceToBuildZone + distanceToFoundation + 12, speed, this.opmode);
                 robot.releaseBlock(this.opmode);
                 this.stepNumber++;
                 break;
             case 10:
                 // park
-                Thread.sleep(500);
-                robot.driveWithDistanceSensor(72, -0.4, robot.rearDistance, this.opmode);
+                Thread.sleep(250);
+                robot.driveForwardDistance(distanceToFoundation - 12, -speed, this.opmode);
                 switch(this.parkingPos) {
                     case FAR:
                         robot.strafeTime(0.25 * colorCoefficient, 2800);
@@ -216,6 +216,6 @@ public class MM_LoadingZoneTemplate {
 
     void driveWithoutDistanceSensor() throws InterruptedException {
         this.robot.driveForwardDistance(16, 0.3, this.opmode);
-        Thread.sleep(500);
+        Thread.sleep(250);
     }
 }
