@@ -49,7 +49,8 @@ public class MM_BuildingZoneTemplate {
         //robot.turnWithImu(0.25, -90, this);
         robot.driveForwardDistance(8, -0.25, opmode);
         robot.moveWaffleMover();
-        robot.driveForwardDistance(34, 0.25, opmode);
+        robot.driveWithDistanceSensor(1, 0.25, robot.frontRange, this.opmode);
+        //robot.driveForwardDistance(34, 0.25, opmode);
         robot.moveWaffleMover();
         robot.driveUntilColor("strafe", -speed * colorCoefficient, this.stringColor, opmode);
         if (parkingPos == ParkingPosition.CLOSE) {

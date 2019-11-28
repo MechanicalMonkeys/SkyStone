@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -48,6 +49,7 @@ public class Robot {
     BNO055IMU imu;
 
     DistanceSensor frontDistance, leftDistance, rightDistance, rearDistance;
+    ModernRoboticsI2cRangeSensor leftRange, frontRange;
     ColorSensor leftColor, insideColor;
     TouchSensor rearTouch;
 
@@ -143,6 +145,9 @@ public class Robot {
         this.leftDistance = hwMap.get(DistanceSensor.class, "leftDistance");
         this.rightDistance = hwMap.get(DistanceSensor.class, "rightDistance");
         this.rearDistance = hwMap.get(DistanceSensor.class, "rearDistance");
+        this.leftRange = hwMap.get(ModernRoboticsI2cRangeSensor.class, "leftRange");
+        this.frontRange = hwMap.get(ModernRoboticsI2cRangeSensor.class, "frontRange");
+
 
         //this.leftColor = hwMap.get(ColorSensor.class, "leftColor");
         //this.insideColor = hwMap.get(ColorSensor.class, "insideColor");
