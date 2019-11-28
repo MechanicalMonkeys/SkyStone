@@ -144,8 +144,8 @@ public class Robot {
         this.rightDistance = hwMap.get(DistanceSensor.class, "rightDistance");
         this.rearDistance = hwMap.get(DistanceSensor.class, "rearDistance");
 
-        this.leftColor = hwMap.get(ColorSensor.class, "leftColor");
-        this.insideColor = hwMap.get(ColorSensor.class, "insideColor");
+        //this.leftColor = hwMap.get(ColorSensor.class, "leftColor");
+        //this.insideColor = hwMap.get(ColorSensor.class, "insideColor");
 
         this.rearTouch = hwMap.get(TouchSensor.class, "rearTouch");
 
@@ -245,7 +245,10 @@ public class Robot {
         while (timer.time(TimeUnit.MILLISECONDS) < milliseconds) {
             double currentAngle = this.getHeading();
             double error = Math.tanh((currentAngle - targetAngle) / 20); // we have to constrain the error between -1 and 1
-            this.setStrafe(power + error);
+            this.rearLeft.setPower(-power + error);
+            this.frontLeft.setPower(power + error);
+            this.rearRight.setPower(power - error);
+            this.frontRight.setPower(power - error);
         }
         this.stopDrive();
     }
@@ -390,6 +393,7 @@ public class Robot {
 
         output += "\nRobot Angle: " + this.getHeading();
 
+        output += "\nRed: " + this.insideColor.red();
         return output;
     }
 

@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Disabled
 @Autonomous(name = "Building Zone Blue Backup")
 public class MM_BuildingZoneBlueBackup extends LinearOpMode {
-private Robot robot = new Robot();
-private enum ParkingPosition {FAR, CLOSE}// far or close to center
+    private Robot robot = new Robot();
+    private enum ParkingPosition {FAR, CLOSE}// far or close to center
     private ParkingPosition parkingPosition = ParkingPosition.FAR;
     private double speed = 0.4;
 

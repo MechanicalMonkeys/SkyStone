@@ -18,7 +18,7 @@ public class DriveHalo extends OpMode {
     boolean slowMode = false; // activate slowMode if both joysticks are pushed down
     boolean strafeMode = false;
     Boolean[] buttons = new Boolean[8];
-    double wristPosition = 0.5;
+    double wristPosition = 0.8;
 
     @Override
     public void init() {
