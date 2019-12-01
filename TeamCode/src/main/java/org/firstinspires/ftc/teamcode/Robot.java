@@ -251,9 +251,9 @@ public class Robot {
             double currentAngle = this.getHeading();
             double error = Math.tanh((currentAngle - targetAngle) / 30); // we have to constrain the error between -1 and 1
             this.rearLeft.setPower(-power + error);
-            this.frontLeft.setPower(-power + error);
+            this.frontLeft.setPower(power + error);
             this.rearRight.setPower(power - error);
-            this.frontRight.setPower(power - error);
+            this.frontRight.setPower(-power - error);
         }
         this.stopDrive();
     }
