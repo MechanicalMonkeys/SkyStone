@@ -164,7 +164,7 @@ public class WebcamTest {
 
     public int getSkystonePosition(String[] labels, float[] vals) { // 1=right, 0=center, -1=left
         float skystoneVal = 0;
-        int pos = 0; // if something goes wrong, default is center
+        int pos;
 
         for (int i = 0; i < 3; i++) {
             String object = labels[i];
@@ -185,6 +185,8 @@ public class WebcamTest {
             pos = 0;
         } else if (skystoneVal == val3) { // Right
             pos = 1;
+        } else {
+            pos = 0; // default is center
         }
         return pos;
     }

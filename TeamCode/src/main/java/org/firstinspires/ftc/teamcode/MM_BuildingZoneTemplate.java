@@ -40,11 +40,11 @@ public class MM_BuildingZoneTemplate {
         robot.init(this.opmode);
         this.opmode.waitForStart();
         robot.driveForwardDistance(48, -speed, opmode);
-        robot.strafeTime(speed * colorCoefficient, 2000);
-        robot.strafeTime(-speed * colorCoefficient, 250);
-        robot.driveForwardDistance(18, speed, opmode);
+        robot.strafeTime(speed * colorCoefficient, 2000, this.opmode);
+        robot.strafeTime(-speed * colorCoefficient, 250, this.opmode);
+        robot.driveForwardDistance(18, speed, this.opmode);
         robot.moveWaffleMover();
-        robot.strafeTime(speed * colorCoefficient, 2000);
+        robot.strafeTime(speed * colorCoefficient, 2000, this.opmode);
         // correction for strafe
         //robot.turnWithImu(0.25, -90, this);
         robot.driveForwardDistance(8, -0.25, opmode);

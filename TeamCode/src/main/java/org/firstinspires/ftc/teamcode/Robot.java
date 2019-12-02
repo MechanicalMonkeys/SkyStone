@@ -48,7 +48,7 @@ public class Robot {
     NavxMicroNavigationSensor navxMicro;
     BNO055IMU imu;
 
-    DistanceSensor frontDistance, leftDistance, rightDistance, rearDistance;
+    DistanceSensor frontDistance, leftDistance, rearDistance;
     ModernRoboticsI2cRangeSensor leftRange, frontRange;
     ColorSensor insideColor;
     TouchSensor rearTouch;
@@ -143,7 +143,6 @@ public class Robot {
         // Sensor init
         this.frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
         this.leftDistance = hwMap.get(DistanceSensor.class, "leftDistance");
-        this.rightDistance = hwMap.get(DistanceSensor.class, "rightDistance");
         this.rearDistance = hwMap.get(DistanceSensor.class, "rearDistance");
         this.leftRange = hwMap.get(ModernRoboticsI2cRangeSensor.class, "leftRange");
         this.frontRange = hwMap.get(ModernRoboticsI2cRangeSensor.class, "frontRange");
@@ -220,13 +219,13 @@ public class Robot {
 
     }
 
-    void driveWithDistanceSensor(double distanceForSensor, double power, DistanceSensor distanceSensor, OpMode opmode) {
+    void driveWithDistanceSensor(double distanceForSensor, double power, DistanceSensor distanceSensor, LinearOpMode opmode) {
         this.setDrivePower(power);
-        double distanceToBlock = distanceSensor.getDistance(DistanceUnit.INCH);
-        while (distanceToBlock > 15) {
-            opmode.telemetry.addData("Distance", distanceToBlock);
+        double distance = distanceSensor.getDistance(DistanceUnit.INCH);
+        while (distance > distanceForSensor) {
+            opmode.telemetry.addData("Distance", distance);
             opmode.telemetry.update();
-            distanceToBlock = distanceSensor.getDistance(DistanceUnit.INCH);
+            distance = distanceSensor.getDistance(DistanceUnit.INCH);
         }
         this.stopDrive();
     }
@@ -242,12 +241,12 @@ public class Robot {
         this.rearRight.setPower(power);
     }
 
-    void strafeTime(double power, long milliseconds) throws InterruptedException {
+    void strafeTime(double power, long milliseconds, LinearOpMode opmode) throws InterruptedException {
         /* strafes for a certain amount of milliseconds */
         double targetAngle = this.getHeading(); // you want to stay at this angle the whole time
         ElapsedTime timer = new ElapsedTime();
         timer.reset();
-        while (timer.time(TimeUnit.MILLISECONDS) < milliseconds) {
+        while (opmode.opModeIsActive() && timer.time(TimeUnit.MILLISECONDS) < milliseconds) {
             double currentAngle = this.getHeading();
             double error = Math.tanh((currentAngle - targetAngle) / 30); // we have to constrain the error between -1 and 1
             this.rearLeft.setPower(-power + error);
@@ -268,7 +267,7 @@ public class Robot {
         this.stopDrive();
     }
 
-    void turnWithImu(double power, double angle, OpMode opmode) {
+    void turnWithImu(double power, double angle, LinearOpMode opmode) {
         double currentAngle = this.getHeading();
         double targetAngle = currentAngle + angle;
         double sign = Math.signum(angle);
@@ -276,7 +275,7 @@ public class Robot {
         this.frontLeft.setPower(-power * sign);
         this.rearRight.setPower(power * sign);
         this.frontRight.setPower(power * sign);
-        while (currentAngle * sign <= targetAngle * sign) {
+        while (opmode.opModeIsActive() && currentAngle * sign <= targetAngle * sign) {
             currentAngle = this.getHeading();
             opmode.telemetry.addData("Angle of Robot", currentAngle);
             opmode.telemetry.update();
@@ -284,14 +283,19 @@ public class Robot {
         this.stopDrive();
     }
 
-    void moveWaffleMover() throws InterruptedException {
+    void moveWaffleMover() {
         this.waffleMover.setPower(this.wafflePower * this.wafflePosition);
-        Thread.sleep(600);
+        ElapsedTime timer = new ElapsedTime();
+        while (true) {
+            if (timer.time(TimeUnit.MILLISECONDS) > 600) {
+                break;
+            }
+        }
         this.waffleMover.setPower(0);
         this.wafflePosition *= -1;
     }
 
-    private void moveArmRotate(int targetPosition, double power, OpMode opmode) {
+    void moveArmRotate(int targetPosition, double power, LinearOpMode opmode) {
         double sign = Math.signum(targetPosition);
 
         // reset encoders
@@ -303,11 +307,11 @@ public class Robot {
         // set power
         this.setArmRotatePower(power);
 
-        long timestart = System.nanoTime() / 1000000000;
         // wait for the armRotate motors to reach the position or else things go bad bad
-        while (this.armRotate.getCurrentPosition() * sign <  targetPosition * sign) {
+        ElapsedTime timer = new ElapsedTime();
+        while (this.armRotate.getCurrentPosition() * sign <  targetPosition * sign && opmode.opModeIsActive()) {
             // if it takes more than 2 seconds, something is wrong so we exit the loop
-            if (System.nanoTime() / 1000000000 - timestart > 10) {
+            if (timer.time(TimeUnit.SECONDS) > 10) {
                 opmode.telemetry.addData("Error", "Gripper movement took too long");
                 opmode.telemetry.update();
                 break;
@@ -326,16 +330,15 @@ public class Robot {
         //this.gripperRotateServo2.setPosition(position);
     }
 
-    void bringArmDown(OpMode opmode) {
+    void bringArmDown(LinearOpMode opmode) {
         if (armPos == armPosition.REST) { // we only bring the arm down if the arm is resting
             // we rotate the arm 180 + ANGLE_OF_GRIPPER_WHEN_GRABBING degrees
-            this.moveArmRotate(-3800, 0.6, opmode);
-            this.stopArmRotate();
+            this.moveArmRotate(-3800, 1.0, opmode);
             this.armPos = armPosition.ACTIVE;
         }
     }
 
-    void foldArmBack(OpMode opmode) {
+    void foldArmBack(LinearOpMode opmode) {
         if (this.armPos == armPosition.ACTIVE) { // we only do something if the arm is active
             if (this.gripperRotatePosition == -1) {
                 // we rotate the gripper so it is perpendicular to the ground
@@ -357,7 +360,7 @@ public class Robot {
         this.gripperPos = gripperPosition.OPEN;
     }
 
-    void pickUpBlock(OpMode opmode) throws InterruptedException { // for autonomous
+    void pickUpBlock(LinearOpMode opmode) throws InterruptedException { // for autonomous
         this.bringArmDown(opmode); // bring arm down
         Thread.sleep(500);
         // we rotate the gripper so it is parallel to the ground
@@ -444,7 +447,7 @@ public class Robot {
         Thread.sleep(500);
         this.gripBlock();
         Thread.sleep(500);
-        this.rotateGripper(1.0);
+        this.rotateGripper(0.9);
     }
 
     void stopEverything() {
@@ -472,7 +475,7 @@ public class Robot {
         return angles.firstAngle;
     }
 
-    void turnToGlobalPosition(double power, double angle, OpMode opmode) {
+    void turnToGlobalPosition(double power, double angle, LinearOpMode opmode) {
         double angleToTurn = angle - this.getHeading();
         this.turnWithImu(power, angleToTurn, opmode);
     }
@@ -504,14 +507,6 @@ public class Robot {
                 }
         }
         this.stopDrive();
-    }
-
-    void goToHome(OpMode opmode) throws InterruptedException {
-        this.rotateGripper(1.0);
-        this.moveArmRotate(-1500, 0.5, opmode);
-        this.liftDown();
-        Thread.sleep(3000);
-        this.stopLift();
     }
 }
 
