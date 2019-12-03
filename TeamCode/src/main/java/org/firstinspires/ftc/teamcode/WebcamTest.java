@@ -2,7 +2,6 @@
 // Modified by Aidan Sun on 24 October 2019
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -186,7 +185,7 @@ public class WebcamTest {
         } else if (skystoneVal == val3) { // Right
             pos = 1;
         } else {
-            pos = 0; // default is center
+            pos = 2;
         }
         return pos;
     }
@@ -221,7 +220,7 @@ public class WebcamTest {
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
     }
 
-    public int detectSkystonePosition(LinearOpMode opmode) {
+    public int detectSkystonePosition() {
 
         /**
          * Activate TensorFlow Object Detection before we wait for the start command.
@@ -251,30 +250,11 @@ public class WebcamTest {
                     }
                     int position;
                     position = getSkystonePosition(label_vals, left_vals);
-                    switch (position) {
-                        case -1:
-                            // Display the results
-                            opmode.telemetry.addData("Skystone Position", "LEFT");
-                            opmode.telemetry.update();
-                            break;
-                        case 0:
-                            // Display the results
-                            opmode.telemetry.addData("Skystone Position", "CENTER");
-                            opmode.telemetry.update();
-                            break;
-                        case 1:
-                            // Display the results
-                            opmode.telemetry.addData("Skystone Position", "RIGHT");
-                            opmode.telemetry.update();
-                            break;
-                    }
                     tfod.shutdown();
                     return position;
                 }
             }
         }
-        opmode.telemetry.addData("Skystone Position", "UNKNOWN");
-        opmode.telemetry.update();
         return 2; // if something goes wrong
     }
 }

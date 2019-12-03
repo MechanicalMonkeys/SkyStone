@@ -57,9 +57,8 @@ public class MM_LoadingZoneTemplate {
         timer.reset();
         int position;
         while (!this.opmode.isStarted()) {
-            position = robot.detectSkystone(this.opmode);
+            position = robot.detectSkystone();
             if (timer.time(TimeUnit.SECONDS) > 5) {
-                skystonePos = Skystone.CENTER;
                 break;
             } else if (position == -1) {
                 skystonePos = Skystone.LEFT;
@@ -78,16 +77,15 @@ public class MM_LoadingZoneTemplate {
 
         if (!opmode.isStarted()) {
             if (skystonePos == Skystone.UNKNOWN) {
-                skystonePos = Skystone.CENTER;
+                skystonePos = Skystone.RIGHT;
             }
+
+            this.opmode.telemetry.addData("Skystone Position", skystonePos);
+            this.opmode.telemetry.update();
 
             // stuff to do after detection but before the state machine
             // wait for start
             this.opmode.waitForStart();
-
-
-        /*this.opmode.telemetry.addData("Opmode", "Ready to start.");
-        this.opmode.telemetry.update();*/
 
             try {
                 while (this.opmode.opModeIsActive()) {
@@ -127,20 +125,20 @@ public class MM_LoadingZoneTemplate {
                 if (robot.frontDistance.getDistance(DistanceUnit.INCH) == 0) {
                     this.driveWithoutDistanceSensor();
                 } else {
-                    robot.driveWithDistanceSensor(15, 0.25, this.robot.frontDistance, this.opmode);
+                    robot.driveWithDistanceSensor(14, 0.25, this.robot.frontDistance, this.opmode);
                 }
                 Thread.sleep(0);
                 switch (skystonePos) {
                     case LEFT:
                         distanceToBuildZone = 30 - colorCoefficient * 6;
                         // strafe to block
-                        robot.strafeTime(-0.4, 1500, this.opmode);
+                        robot.strafeTime(-0.4, 1700, this.opmode);
                         // correct for the strafe
                         //robot.turnRight(-0.25, 250);
                         break;
                     case CENTER:
                         distanceToBuildZone = 30;
-                        robot.strafeTime(-0.4, 250, this.opmode);
+                        robot.strafeTime(-0.4, 750, this.opmode);
                         break;
                     case RIGHT:
                         distanceToBuildZone = 30 + colorCoefficient * 6;
@@ -163,8 +161,9 @@ public class MM_LoadingZoneTemplate {
                 // turn towards skybridge
                 robot.turnToGlobalPosition(0.25, 90 * colorCoefficient, this.opmode);
                 robot.rotateGripper(1.0);
+                robot.strafeTime(0.4 * colorCoefficient, 500, this.opmode);
                 // drive to foundation
-                robot.driveForwardDistance(distanceToFoundation + distanceToBuildZone - 16, speed, this.opmode);
+                robot.driveForwardDistance(distanceToFoundation + distanceToBuildZone - 13, speed, this.opmode);
                 this.stepNumber++;
                 break;
             case 5:
@@ -212,22 +211,23 @@ public class MM_LoadingZoneTemplate {
                 robot.driveForwardDistance(0, -speed, this.opmode);
                 robot.turnToGlobalPosition(0.4, 90 * colorCoefficient, this.opmode);
                 robot.rotateGripper(1.0);
-                robot.driveForwardDistance(distanceToBuildZone + distanceToFoundation + 3, speed, this.opmode);
+                robot.strafeTime(0.4 * colorCoefficient, 500, this.opmode);
+                robot.driveForwardDistance(distanceToBuildZone + distanceToFoundation + 9, speed, this.opmode);
                 robot.releaseBlock(this.opmode);
                 this.stepNumber++;
                 break;
             case 10:
                 // park
-                Thread.sleep(0);
+                Thread.sleep(125);
                 switch(this.parkingPos) {
                     case FAR:
                         robot.strafeTime(-0.6 * colorCoefficient, 2300, this.opmode);
                         break;
                     case CLOSE:
-                        robot.strafeTime(0.6 * colorCoefficient, 500, this.opmode);
+                        robot.strafeTime(0.6 * colorCoefficient, 1000, this.opmode);
                         break;
                 }
-                robot.driveForwardDistance(distanceToFoundation - 12, -speed, this.opmode);
+                robot.driveForwardDistance(12, -speed, this.opmode);
                 this.stepNumber++;
                 break;
             case 11: // everything is stopped - thanos c. 2019

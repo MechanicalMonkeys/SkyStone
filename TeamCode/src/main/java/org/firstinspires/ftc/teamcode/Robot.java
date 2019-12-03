@@ -377,8 +377,8 @@ public class Robot {
 
     void stopLift() { this.liftMotor.setPower(0); }
 
-    int detectSkystone(LinearOpMode opmode) {
-        return detector.detectSkystonePosition(opmode);
+    int detectSkystone() {
+        return detector.detectSkystonePosition();
     }
 
     void setArmRotatePower(double power) {
@@ -495,13 +495,13 @@ public class Robot {
         timer.reset();
         switch(color) {
             case "red":
-                while(this.insideColor.red() < 150) {
+                while(this.insideColor.red() < 4000) {
                     opmode.telemetry.addData("Red", this.insideColor.red());
                     opmode.telemetry.update();
                 }
                 break;
             case "blue":
-                while(this.insideColor.blue() < 150) {
+                while(this.insideColor.blue() < 4000) {
                     opmode.telemetry.addData("Blue", this.insideColor.blue());
                     opmode.telemetry.update();
                 }
