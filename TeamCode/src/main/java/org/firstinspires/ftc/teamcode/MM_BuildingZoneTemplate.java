@@ -39,22 +39,20 @@ public class MM_BuildingZoneTemplate {
     public void run() throws InterruptedException {
         robot.init(this.opmode);
         this.opmode.waitForStart();
-        robot.driveForwardDistance(48, -speed, opmode);
-        robot.strafeTime(speed * colorCoefficient, 2000, this.opmode);
-        robot.strafeTime(-speed * colorCoefficient, 250, this.opmode);
-        robot.driveForwardDistance(18, speed, this.opmode);
+        robot.drive.driveForwardDistance(48, -speed, opmode);
+        robot.drive.strafeTime(speed * colorCoefficient, 2000, this.opmode);
+        robot.drive.strafeTime(-speed * colorCoefficient, 250, this.opmode);
+        robot.drive.driveForwardDistance(18, speed, this.opmode);
         robot.moveWaffleMover();
-        robot.strafeTime(speed * colorCoefficient, 2000, this.opmode);
-        // correction for strafe
-        //robot.turnWithImu(0.25, -90, this);
-        robot.driveForwardDistance(8, -0.25, opmode);
+        robot.drive.strafeTime(speed * colorCoefficient, 2000, this.opmode);
+        robot.drive.driveForwardDistance(8, -0.25, opmode);
         robot.moveWaffleMover();
-        robot.driveWithDistanceSensor(1, 0.25, robot.frontRange, this.opmode);
+        robot.drive.driveWithDistanceSensor(1, 0.25, robot.frontRange, this.opmode);
         //robot.driveForwardDistance(34, 0.25, opmode);
         robot.moveWaffleMover();
-        robot.driveUntilColor("strafe", -speed * colorCoefficient, this.stringColor, opmode);
+        robot.drive.driveUntilColor("strafe", -speed * colorCoefficient, this.stringColor, opmode);
         if (parkingPos == ParkingPosition.CLOSE) {
-            robot.driveForwardDistance(22, -0.4, opmode);
+            robot.drive.driveForwardDistance(22, -0.4, opmode);
         }
     }
 

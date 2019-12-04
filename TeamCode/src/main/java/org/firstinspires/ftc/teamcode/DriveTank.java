@@ -40,7 +40,7 @@ public class DriveTank extends OpMode {
 
         // Strafe
         if (leftStrafe == rightStrafe && leftPower == 0 && rightPower == 0) {
-            robot.setStrafe(leftPower);
+            robot.drive.setStrafe(leftPower);
         }
 
         // Not strafing

@@ -14,7 +14,7 @@ public class StrafeTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(this);
         waitForStart();
-        robot.strafeTime(0.4, 10000, this);
+        robot.drive.strafeTime(0.4, 10000, this);
 
     }
 }

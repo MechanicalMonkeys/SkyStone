@@ -1,5 +1,3 @@
-
-// Modified by Aidan Sun on 24 October 2019
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;

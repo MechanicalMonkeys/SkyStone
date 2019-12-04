@@ -5,7 +5,6 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -19,7 +18,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.concurrent.TimeUnit;
@@ -27,21 +25,21 @@ import java.util.concurrent.TimeUnit;
 // THIS IS NOT AN OPMODE - IT IS A DEFINING CLASS
 public class Robot {
 
-    // armRotate encoder count: -3650
+    // Units
+    RobotDrive drive;
+    RobotArm arm;
 
     // Motors
-    public DcMotor rearLeft;
-    public DcMotor rearRight;
-    public DcMotor frontLeft;
-    public DcMotor frontRight;
-    public DcMotor waffleMover;
-    public DcMotor armRotate;
-    public DcMotor liftMotor;
+    DcMotor rearLeft;
+    DcMotor rearRight;
+    DcMotor frontLeft;
+    DcMotor frontRight;
+    DcMotor waffleMover;
+    DcMotor armRotate;
+    DcMotor liftMotor;
 
     // Servos
-    Servo gripperRotateServo1;
-    Servo gripperRotateServo2;
-    private Servo grabServo;
+    Servo gripperRotateServo, grabServo, capstoneArm;
 
     // Sensors
     IntegratingGyroscope gyro;
@@ -62,7 +60,7 @@ public class Robot {
     private double TORQUENADO20_TICKS_PER_REV = 480; // ticks / rev
     private double WHEEL_DIAMETER = 4;
     private double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI; // in / rev
-    private double TICKS_PER_INCH = TORQUENADO20_TICKS_PER_REV / WHEEL_CIRCUMFERENCE; // ticks / in
+    double TICKS_PER_INCH = TORQUENADO20_TICKS_PER_REV / WHEEL_CIRCUMFERENCE; // ticks / in
     double ROBOT_EXTENDED_LENGTH = 30.0; // in
     double ROBOT_RETRACTED_LENGTH = 18.0; // in
 
@@ -79,16 +77,18 @@ public class Robot {
     PIDController PIDDrive = new PIDController(pDrive, iDrive, dDrive);
 
     // info
-    private int wafflePosition = -1; // 1 = Up, -1 = Down Waffle mover starts down
-    private double wafflePower = 0.5;
+    int wafflePosition = -1; // 1 = Up, -1 = Down Waffle mover starts down
+    double wafflePower = 0.5;
 
-    private double gripperRotatePosition = 1.0; // 1.0 = at a 90 degree angle, 0.8 = parallel to ground
+    double gripperRotatePosition = 1.0; // 1.0 = at a 90 degree angle, 0.8 = parallel to ground
 
-    private enum gripperPosition {OPEN, CLOSED}
-    private gripperPosition gripperPos = gripperPosition.OPEN;
+    int capstoneArmPosition = 0;
 
-    public enum armPosition {REST, ACTIVE}
-    public armPosition armPos = armPosition.REST;
+    enum gripperPosition {OPEN, CLOSED}
+    gripperPosition gripperPos = gripperPosition.OPEN;
+
+    enum armPosition {REST, ACTIVE}
+    armPosition armPos = armPosition.REST;
     Orientation angles;
 
 
@@ -126,19 +126,15 @@ public class Robot {
         this.armRotate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.armRotate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        // set motor powers to 0 so they don't cause problems
-        this.stopDrive();
-        this.waffleMover.setPower(0);
-        this.armRotate.setPower(0);
-        this.liftMotor.setPower(0);
-
         // Servo mapping
-        this.gripperRotateServo1 = hwMap.get(Servo.class, "gripperRotateServo1");
+        this.gripperRotateServo = hwMap.get(Servo.class, "gripperRotateServo");
         this.grabServo = hwMap.get(Servo.class, "grabServo");
+        this.capstoneArm = hwMap.get(Servo.class, "capstoneArm");
 
         // Servo direction
-        this.gripperRotateServo1.setDirection(Servo.Direction.FORWARD);
+        this.gripperRotateServo.setDirection(Servo.Direction.FORWARD);
         this.grabServo.setDirection(Servo.Direction.FORWARD);
+        this.capstoneArm.setDirection(Servo.Direction.FORWARD);
 
         // Sensor init
         this.frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
@@ -153,6 +149,16 @@ public class Robot {
 
         this.rearTouch = hwMap.get(TouchSensor.class, "rearTouch");
 
+        // Units
+        this.drive = new RobotDrive(this, this.rearLeft, this.rearRight, this.frontLeft, this.frontRight);
+        this.arm = new RobotArm(this, this.armRotate, this.gripperRotateServo, this.grabServo);
+
+        // set motor powers to 0 so they don't cause problems
+        this.drive.stopDrive();
+        this.waffleMover.setPower(0);
+        this.arm.armRotate.setPower(0);
+        this.liftMotor.setPower(0);
+
         // init imu
         this.initImu();
 
@@ -163,124 +169,6 @@ public class Robot {
         // NavX Gyro Init
         //this.initNavXGyro(opmode);
 
-    }
-
-    void setDrivePower(double power) {
-        /* sets all drive motors to a certain power */
-        this.rearLeft.setPower(power);
-        this.frontLeft.setPower(power);
-        this.rearRight.setPower(power);
-        this.frontRight.setPower(power);
-    }
-
-    void setDriveMode(DcMotor.RunMode runMode) {
-        /* sets all drive motors to a certain mode */
-        this.rearLeft.setMode(runMode);
-        this.frontLeft.setMode(runMode);
-        this.rearRight.setMode(runMode);
-        this.frontRight.setMode(runMode);
-    }
-
-    void stopDrive() {
-        /* stops all the drive motors */
-        this.setDrivePower(0);
-    }
-
-
-    void driveForwardDistance(double distance, double power, LinearOpMode opmode) { // make power negative to go backwards
-        /* drives forward a certain distance(in) using encoders */
-        double targetAngle = this.getHeading();
-
-        // calculate ticks
-        long NUM_TICKS_LONG = StrictMath.round(this.TICKS_PER_INCH * distance);
-        int NUM_TICKS = (int) NUM_TICKS_LONG;
-
-        // reset encoders
-        this.setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // set mode
-        this.setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // drive
-        while (opmode.opModeIsActive() && Math.abs(this.rearLeft.getCurrentPosition()) < NUM_TICKS && Math.abs(this.frontLeft.getCurrentPosition()) < NUM_TICKS
-        && Math.abs(this.rearRight.getCurrentPosition()) < NUM_TICKS && Math.abs(this.frontRight.getCurrentPosition()) < NUM_TICKS) {
-            double currentAngle = this.getHeading();
-            double error = Math.tanh((currentAngle - targetAngle) / 40);
-            this.frontLeft.setPower(power + error);
-            this.frontRight.setPower(power - error);
-            this.rearLeft.setPower(power + error);
-            this.rearRight.setPower(power - error);
-            opmode.telemetry.addData("Angle of Robot", currentAngle);
-            opmode.telemetry.update();
-        }
-
-        // stop driving
-        this.stopDrive();
-
-    }
-
-    void driveWithDistanceSensor(double distanceForSensor, double power, DistanceSensor distanceSensor, LinearOpMode opmode) {
-        this.setDrivePower(power);
-        double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-        while (distance > distanceForSensor) {
-            opmode.telemetry.addData("Distance", distance);
-            opmode.telemetry.update();
-            distance = distanceSensor.getDistance(DistanceUnit.INCH);
-        }
-        this.stopDrive();
-    }
-
-    void setStrafe(double power) {
-        /* strafes at certain power
-        positive power goes to the right
-        negative power goes to the left */
-        this.rearLeft.setPower(-power);
-        this.frontRight.setPower(-power);
-
-        this.frontLeft.setPower(power);
-        this.rearRight.setPower(power);
-    }
-
-    void strafeTime(double power, long milliseconds, LinearOpMode opmode) throws InterruptedException {
-        /* strafes for a certain amount of milliseconds */
-        double targetAngle = this.getHeading(); // you want to stay at this angle the whole time
-        ElapsedTime timer = new ElapsedTime();
-        timer.reset();
-        while (opmode.opModeIsActive() && timer.time(TimeUnit.MILLISECONDS) < milliseconds) {
-            double currentAngle = this.getHeading();
-            double error = Math.tanh((currentAngle - targetAngle) / 30); // we have to constrain the error between -1 and 1
-            this.rearLeft.setPower(-power + error);
-            this.frontLeft.setPower(power + error);
-            this.rearRight.setPower(power - error);
-            this.frontRight.setPower(-power - error);
-        }
-        this.stopDrive();
-    }
-
-    void turnRight(double power, long milliseconds) throws InterruptedException {
-        this.rearLeft.setPower(power);
-        this.frontLeft.setPower(power);
-
-        this.rearRight.setPower(-power);
-        this.frontRight.setPower(-power);
-        Thread.sleep(milliseconds);
-        this.stopDrive();
-    }
-
-    void turnWithImu(double power, double angle, LinearOpMode opmode) {
-        double currentAngle = this.getHeading();
-        double targetAngle = currentAngle + angle;
-        double sign = Math.signum(angle);
-        this.rearLeft.setPower(-power * sign);
-        this.frontLeft.setPower(-power * sign);
-        this.rearRight.setPower(power * sign);
-        this.frontRight.setPower(power * sign);
-        while (opmode.opModeIsActive() && currentAngle * sign <= targetAngle * sign) {
-            currentAngle = this.getHeading();
-            opmode.telemetry.addData("Angle of Robot", currentAngle);
-            opmode.telemetry.update();
-        }
-        this.stopDrive();
     }
 
     void moveWaffleMover() {
@@ -295,80 +183,8 @@ public class Robot {
         this.wafflePosition *= -1;
     }
 
-    void moveArmRotate(int targetPosition, double power, LinearOpMode opmode) {
-        double sign = Math.signum(targetPosition);
-
-        // reset encoders
-        this.armRotate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // set mode
-        this.armRotate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // set power
-        this.setArmRotatePower(power);
-
-        // wait for the armRotate motors to reach the position or else things go bad bad
-        ElapsedTime timer = new ElapsedTime();
-        while (this.armRotate.getCurrentPosition() * sign <  targetPosition * sign && opmode.opModeIsActive()) {
-            // if it takes more than 2 seconds, something is wrong so we exit the loop
-            if (timer.time(TimeUnit.SECONDS) > 10) {
-                opmode.telemetry.addData("Error", "Gripper movement took too long");
-                opmode.telemetry.update();
-                break;
-            }
-
-            opmode.telemetry.addData("Gripper", targetPosition + " " + this.armRotate.getCurrentPosition());
-            opmode.telemetry.update();
-        }
-
-        // stop the armRotate motors
-        this.stopArmRotate();
-    }
-
-    void rotateGripper(double position) {
-        this.gripperRotateServo1.setPosition(position);
-        //this.gripperRotateServo2.setPosition(position);
-    }
-
-    void bringArmDown(LinearOpMode opmode) {
-        if (armPos == armPosition.REST) { // we only bring the arm down if the arm is resting
-            // we rotate the arm 180 + ANGLE_OF_GRIPPER_WHEN_GRABBING degrees
-            this.moveArmRotate(-3800, 1.0, opmode);
-            this.armPos = armPosition.ACTIVE;
-        }
-    }
-
-    void foldArmBack(LinearOpMode opmode) {
-        if (this.armPos == armPosition.ACTIVE) { // we only do something if the arm is active
-            if (this.gripperRotatePosition == -1) {
-                // we rotate the gripper so it is perpendicular to the ground
-                this.rotateGripper(0.5);
-            }
-            // we rotate the arm 225 degrees
-            this.moveArmRotate(3100, -0.6, opmode);
-            this.armPos = armPosition.REST;
-        }
-    }
-
-    void gripBlock() {
-        this.grabServo.setPosition(0);
-        this.gripperPos = gripperPosition.CLOSED;
-    }
-
-    void releaseBlock(OpMode opmode) {
-        this.grabServo.setPosition(1);
-        this.gripperPos = gripperPosition.OPEN;
-    }
-
-    void pickUpBlock(LinearOpMode opmode) throws InterruptedException { // for autonomous
-        this.bringArmDown(opmode); // bring arm down
-        Thread.sleep(500);
-        // we rotate the gripper so it is parallel to the ground
-        this.rotateGripper(0.5);
-        this.gripBlock(); // grab the block
-        Thread.sleep(500);
-        // we rotate the gripper back
-        this.rotateGripper(0.9);
+    void stopWaffleMover() {
+        this.waffleMover.setPower(0);
     }
 
     void liftUp() { this.liftMotor.setPower(0.5); }
@@ -381,12 +197,6 @@ public class Robot {
         return detector.detectSkystonePosition();
     }
 
-    void setArmRotatePower(double power) {
-        this.armRotate.setPower(power);
-    }
-
-    void stopArmRotate() { this.setArmRotatePower(0); }
-
     String getInfo() {
         String output = "Arm Position: " + this.armRotate.getCurrentPosition() + "\nWaffle Position: ";
         if (this.wafflePosition == -1) {
@@ -395,19 +205,17 @@ public class Robot {
             output += "Up\nWrist Position: ";
         }
 
-        output += this.gripperRotateServo1.getPosition() + "\nGripper Position: ";
+        output += this.gripperRotateServo.getPosition() + "\nGripper Position: ";
 
         output += this.gripperPos;
 
         output += "\nRobot Angle: " + this.getHeading();
 
         output += "\nRed: " + this.insideColor.red();
-        return output;
-    }
 
-    void toggleWrist() {
-        this.rotateGripper(this.gripperRotatePosition);
-        this.gripperRotatePosition = 1.8 - this.gripperRotatePosition;
+        output += "\nCapstone Arm: " + this.capstoneArmPosition;
+
+        return output;
     }
 
     void initNavXGyro(OpMode opmode) throws InterruptedException {
@@ -441,18 +249,10 @@ public class Robot {
         return angles.firstAngle;
     }
 
-    void grabBlockAuto() throws InterruptedException {
-        // grab block
-        this.rotateGripper(0.8);
-        Thread.sleep(500);
-        this.gripBlock();
-        Thread.sleep(500);
-        this.rotateGripper(0.9);
-    }
-
     void stopEverything() {
-        this.stopDrive();
-        this.stopArmRotate();
+        this.drive.stopDrive();
+        this.arm.stopArmRotate();
+        this.stopWaffleMover();
         this.stopLift();
     }
 
@@ -475,38 +275,9 @@ public class Robot {
         return angles.firstAngle;
     }
 
-    void turnToGlobalPosition(double power, double angle, LinearOpMode opmode) {
-        double angleToTurn = angle - this.getHeading();
-        this.turnWithImu(power, angleToTurn, opmode);
-    }
-
-    void driveUntilColor(String mode, double power, String color, OpMode opmode) {
-        switch(mode) {
-            case "strafe":
-                this.setStrafe(power);
-                break;
-            case "drive":
-                this.setDrivePower(power);
-                break;
-            default:
-                return;
-        }
-        ElapsedTime timer = new ElapsedTime();
-        timer.reset();
-        switch(color) {
-            case "red":
-                while(this.insideColor.red() < 4000) {
-                    opmode.telemetry.addData("Red", this.insideColor.red());
-                    opmode.telemetry.update();
-                }
-                break;
-            case "blue":
-                while(this.insideColor.blue() < 4000) {
-                    opmode.telemetry.addData("Blue", this.insideColor.blue());
-                    opmode.telemetry.update();
-                }
-        }
-        this.stopDrive();
+    void toggleCapstoneArm() {
+        this.capstoneArmPosition = 1 - this.capstoneArmPosition;
+        capstoneArm.setPosition(this.capstoneArmPosition);
     }
 }
 

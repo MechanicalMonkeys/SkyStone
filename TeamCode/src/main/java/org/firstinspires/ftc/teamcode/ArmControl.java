@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+@Disabled
 @TeleOp(name = "Arm Control")
 public class ArmControl extends DriveHalo {
 
@@ -19,7 +21,7 @@ public class ArmControl extends DriveHalo {
 
     @Override
     void armController() {
-        robot.setArmRotatePower(0.4 * gamepad2.left_stick_y);
+        robot.arm.setArmRotatePower(0.4 * gamepad2.left_stick_y);
         if (gamepad2.a) {
             robot.armRotate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         } else {
@@ -27,5 +29,3 @@ public class ArmControl extends DriveHalo {
         }
     }
 }
-
-// Hi my name is Neel and I like to poop

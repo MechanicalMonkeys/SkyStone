@@ -31,7 +31,7 @@ public class DriveHalo extends OpMode {
         for (int i = 0; i < buttons.length; i++) {
             buttons[i] = false;
         }
-        robot.rotateGripper(wristPosition);
+        robot.arm.rotateGripper(wristPosition);
 
         telemetry.addData("Initialized", "Ready to start");
         telemetry.update();
@@ -45,6 +45,7 @@ public class DriveHalo extends OpMode {
         this.gripperController();
         this.liftController();
         this.waffleController();
+        this.capstoneArmController();
         telemetry.addData("Robot Info: ", robot.getInfo());
         telemetry.update();
     }
@@ -81,7 +82,7 @@ public class DriveHalo extends OpMode {
                 e.printStackTrace();
             }
         }*/ //if (robot.armPos == Robot.armPosition.ACTIVE) {
-            robot.setArmRotatePower(0.4 * gamepad2.left_stick_y);
+            robot.arm.setArmRotatePower(0.4 * gamepad2.left_stick_y);
         //}
 
         buttons[1] = gamepad2.dpad_down;
@@ -91,24 +92,24 @@ public class DriveHalo extends OpMode {
     void wristController() {
         if (gamepad2.right_stick_y != 0) {
             this.wristPosition -= 0.01 * gamepad2.right_stick_y;
-            robot.rotateGripper(this.wristPosition);
+            robot.arm.rotateGripper(this.wristPosition);
         } else if (gamepad2.b && !buttons[6]) {
-            robot.toggleWrist();
+            robot.arm.toggleWrist();
         }
-        buttons[6] = gamepad2.b;
+        buttons[3] = gamepad2.b;
 
     }
 
     void gripperController() {
         if (gamepad2.a && !buttons[5]) {
             if (armClosed) {
-                robot.releaseBlock(this); // release the block
+                robot.arm.releaseBlock(this); // release the block
             } else {
-                robot.gripBlock(); // grab the block
+                robot.arm.gripBlock(); // grab the block
             }
             armClosed = !armClosed;
         }
-        buttons[5] = gamepad2.a;
+        buttons[4] = gamepad2.a;
     }
 
     void driveController() {
@@ -122,7 +123,7 @@ public class DriveHalo extends OpMode {
         }
 
         if (this.strafeMode) {
-            robot.setStrafe(speedControl * gamepad1.right_stick_x);
+            robot.drive.setStrafe(speedControl * gamepad1.right_stick_x);
         } else {
             double drive = speedControl * -gamepad1.left_stick_y; // forward
             double turn = 0.5 * speedControl * gamepad1.right_stick_x; // turn
@@ -133,5 +134,12 @@ public class DriveHalo extends OpMode {
             robot.rearRight.setPower(rightPower);
             robot.frontRight.setPower(rightPower);
         }
+    }
+
+    void capstoneArmController() {
+        if (gamepad2.dpad_up && gamepad2.x && !buttons[5]) {
+            robot.toggleCapstoneArm();
+        }
+        buttons[5] = gamepad2.dpad_up && gamepad2.x;
     }
 }
