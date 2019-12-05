@@ -80,7 +80,7 @@ public class MM_LoadingZoneTemplate {
                 skystonePos = Skystone.CENTER;
             }
 
-            skystonePos = Skystone.RIGHT;
+            //skystonePos = Skystone.LEFT;
             this.opmode.telemetry.addData("Skystone Position", skystonePos);
             this.opmode.telemetry.update();
 
@@ -126,7 +126,7 @@ public class MM_LoadingZoneTemplate {
                 if (robot.frontDistance.getDistance(DistanceUnit.INCH) == 0) {
                     this.driveWithoutDistanceSensor();
                 } else {
-                    robot.drive.driveWithDistanceSensor(15.25, 0.25, this.robot.frontDistance, this.opmode);
+                    robot.drive.driveWithDistanceSensor(15.1, 0.25, this.robot.frontDistance, this.opmode);
                 }
                 Thread.sleep(0);
                 switch (skystonePos) {
@@ -184,7 +184,7 @@ public class MM_LoadingZoneTemplate {
                 robot.drive.turnToGlobalPosition(0.25, 0, this.opmode);
                 if ((this.skystonePos == Skystone.LEFT && this.allianceColor == AllianceColor.RED) ||
                         (this.skystonePos == Skystone.RIGHT && this.allianceColor == AllianceColor.BLUE)) {
-                    robot.drive.turnToGlobalPosition(0.25, -15 * colorCoefficient, this.opmode);
+                    robot.drive.turnToGlobalPosition(0.25, -20 * colorCoefficient, this.opmode);
                     robot.drive.driveForwardDistance(3, 0.25, this.opmode);
                 }
                 this.stepNumber++;
@@ -225,7 +225,7 @@ public class MM_LoadingZoneTemplate {
                         robot.drive.strafeTime(-0.6 * colorCoefficient, 2300, this.opmode);
                         break;
                     case CLOSE:
-                        robot.drive.strafeTime(0.6 * colorCoefficient, 750, this.opmode);
+                        robot.drive.strafeTime(0.6 * colorCoefficient, 700, this.opmode);
                         break;
                 }
                 robot.drive.driveForwardDistance(20, -speed, this.opmode);
