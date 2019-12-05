@@ -82,7 +82,7 @@ public class Robot {
 
     double gripperRotatePosition = 1.0; // 1.0 = at a 90 degree angle, 0.8 = parallel to ground
 
-    double capstoneArmPosition = 0.1;
+    double capstoneArmPosition = 0.2;
 
     enum gripperPosition {OPEN, CLOSED}
     gripperPosition gripperPos = gripperPosition.OPEN;
@@ -276,7 +276,7 @@ public class Robot {
     }
 
     void toggleCapstoneArm() {
-        this.capstoneArmPosition = 1.1 - this.capstoneArmPosition;
+        this.capstoneArmPosition = 1.2 - this.capstoneArmPosition;
         capstoneArm.setPosition(this.capstoneArmPosition);
     }
 }
