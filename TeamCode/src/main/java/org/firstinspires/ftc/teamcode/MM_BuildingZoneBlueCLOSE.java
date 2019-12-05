@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class MM_BuildingZoneBlueCLOSE extends LinearOpMode {
     private Robot robot = new Robot();
 
-    MM_BuildingZoneTemplate opmode = new MM_BuildingZoneTemplate(MM_BuildingZoneTemplate.ParkingPosition.CLOSE,
-            MM_BuildingZoneTemplate.AllianceColor.BLUE, this, robot);
+    MM_BuildingZoneTemplateBlue opmode = new MM_BuildingZoneTemplateBlue(MM_BuildingZoneTemplateBlue.ParkingPosition.CLOSE,
+            MM_BuildingZoneTemplateBlue.AllianceColor.BLUE, this, robot);
 
     @Override
     public void runOpMode() throws InterruptedException {
