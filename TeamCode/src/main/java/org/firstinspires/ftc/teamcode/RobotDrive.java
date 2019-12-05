@@ -80,9 +80,10 @@ public class RobotDrive {
     }
 
     void driveWithDistanceSensor(double distanceForSensor, double power, DistanceSensor distanceSensor, LinearOpMode opmode) {
-        this.setDrivePower(power);
         double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-        while (distance > distanceForSensor) {
+        double sign = Math.signum(distance - distanceForSensor);
+        this.setDrivePower(power * sign);
+        while (distance * sign > distanceForSensor * sign) {
             opmode.telemetry.addData("Distance", distance);
             opmode.telemetry.update();
             distance = distanceSensor.getDistance(DistanceUnit.INCH);
