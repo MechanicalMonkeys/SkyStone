@@ -93,7 +93,7 @@ public class DriveHalo extends OpMode {
         if (gamepad2.right_stick_y != 0) {
             this.wristPosition -= 0.01 * gamepad2.right_stick_y;
             robot.arm.rotateGripper(this.wristPosition);
-        } else if (gamepad2.b && !buttons[6]) {
+        } else if (gamepad2.b && !buttons[3]) {
             robot.arm.toggleWrist();
         }
         buttons[3] = gamepad2.b;
@@ -101,7 +101,7 @@ public class DriveHalo extends OpMode {
     }
 
     void gripperController() {
-        if (gamepad2.a && !buttons[5]) {
+        if (gamepad2.a && !buttons[4]) {
             if (armClosed) {
                 robot.arm.releaseBlock(this); // release the block
             } else {
