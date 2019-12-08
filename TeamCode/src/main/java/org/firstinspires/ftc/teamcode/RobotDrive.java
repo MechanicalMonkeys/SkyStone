@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -79,10 +78,19 @@ public class RobotDrive {
 
     }
 
-    void driveWithDistanceSensor(double distanceForSensor, double power, DistanceSensor distanceSensor, LinearOpMode opmode) {
+    void driveWithDistanceSensor(String mode, double distanceForSensor, double power, DistanceSensor distanceSensor, LinearOpMode opmode) {
         double distance = distanceSensor.getDistance(DistanceUnit.INCH);
         double sign = Math.signum(distance - distanceForSensor);
-        this.setDrivePower(power * sign);
+        switch(mode) {
+            case "strafe":
+                this.setStrafe(power * sign);
+                break;
+            case "drive":
+                this.setDrivePower(power * sign);
+                break;
+            default:
+                return;
+        }
         while (distance * sign > distanceForSensor * sign) {
             opmode.telemetry.addData("Distance", distance);
             opmode.telemetry.update();
@@ -149,7 +157,7 @@ public class RobotDrive {
         this.turnWithImu(power, angleToTurn, opmode);
     }
 
-    void driveUntilColor(String mode, double power, String color, OpMode opmode) {
+    void driveUntilColor(String mode, double power, String color, LinearOpMode opmode) {
         switch(mode) {
             case "strafe":
                 this.setStrafe(power);
@@ -164,13 +172,13 @@ public class RobotDrive {
         timer.reset();
         switch(color) {
             case "red":
-                while(this.robot.insideColor.red() < 4000) {
+                while(opmode.opModeIsActive() && this.robot.insideColor.red() < 4000) {
                     opmode.telemetry.addData("Red", this.robot.insideColor.red());
                     opmode.telemetry.update();
                 }
                 break;
             case "blue":
-                while(this.robot.insideColor.blue() < 4000) {
+                while(opmode.opModeIsActive() && this.robot.insideColor.blue() < 4000) {
                     opmode.telemetry.addData("Blue", this.robot.insideColor.blue());
                     opmode.telemetry.update();
                 }

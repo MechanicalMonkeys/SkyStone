@@ -82,7 +82,7 @@ public class Robot {
 
     double gripperRotatePosition = 1.0; // 1.0 = at a 90 degree angle, 0.8 = parallel to ground
 
-    double capstoneArmPosition = 0.2;
+    double capstoneArmPosition = 0.0;
 
     enum gripperPosition {OPEN, CLOSED}
     gripperPosition gripperPos = gripperPosition.OPEN;
@@ -171,15 +171,18 @@ public class Robot {
 
     }
 
-    void moveWaffleMover() {
+    void moveWaffleMover(boolean hold) {
         this.waffleMover.setPower(this.wafflePower * this.wafflePosition);
         ElapsedTime timer = new ElapsedTime();
+        timer.reset();
         while (true) {
-            if (timer.time(TimeUnit.MILLISECONDS) > 600) {
+            if (timer.time(TimeUnit.MILLISECONDS) > 800) {
                 break;
             }
         }
-        this.waffleMover.setPower(0);
+        if (!hold) {
+            this.waffleMover.setPower(0);
+        }
         this.wafflePosition *= -1;
     }
 
@@ -276,7 +279,7 @@ public class Robot {
     }
 
     void toggleCapstoneArm() {
-        this.capstoneArmPosition = 1.2 - this.capstoneArmPosition;
+        this.capstoneArmPosition = 0.95 - this.capstoneArmPosition;
         capstoneArm.setPosition(this.capstoneArmPosition);
     }
 }

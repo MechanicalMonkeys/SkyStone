@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -81,7 +80,7 @@ public class RobotArm {
         this.robot.gripperPos = Robot.gripperPosition.CLOSED;
     }
 
-    void releaseBlock(OpMode opmode) {
+    void releaseBlock() {
         this.grabServo.setPosition(1);
         this.robot.gripperPos = Robot.gripperPosition.OPEN;
     }
@@ -104,8 +103,8 @@ public class RobotArm {
     void stopArmRotate() { this.setArmRotatePower(0); }
 
     void toggleWrist() {
-        this.rotateGripper(this.robot.gripperRotatePosition);
         this.robot.gripperRotatePosition = 1.8 - this.robot.gripperRotatePosition;
+        this.rotateGripper(this.robot.gripperRotatePosition);
     }
 
     void grabBlockAuto() throws InterruptedException {

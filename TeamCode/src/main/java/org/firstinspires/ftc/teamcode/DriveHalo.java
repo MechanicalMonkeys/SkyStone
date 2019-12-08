@@ -11,7 +11,7 @@ public class DriveHalo extends OpMode {
     Robot robot = new Robot();
 
     // init variables
-    double speedControl = 0.5; // to make the robot go slower since we use Orbital 20s
+    double speedControl = 0.5; // to make the robot go slower since we use TorqueNado 20s
     private double compensation = 1; // compensation so the robot can move forward AND turn while both joysticks are used
     private float deadZone = 0.2f; // joystick deadzone
     private boolean armClosed = false;
@@ -63,7 +63,7 @@ public class DriveHalo extends OpMode {
 
     void waffleController() {
         if (gamepad1.y && !buttons[0]) {
-            robot.moveWaffleMover();
+            robot.moveWaffleMover(false);
         }
         buttons[0] = gamepad1.y;
     }
@@ -84,13 +84,10 @@ public class DriveHalo extends OpMode {
         }*/ //if (robot.armPos == Robot.armPosition.ACTIVE) {
             robot.arm.setArmRotatePower(0.4 * gamepad2.left_stick_y);
         //}
-
-        buttons[1] = gamepad2.dpad_down;
-        buttons[2] = gamepad2.dpad_up;
     }
 
     void wristController() {
-        if (gamepad2.right_stick_y != 0) {
+        if (gamepad2.right_stick_y > 0.2 || gamepad2.right_stick_y < -0.2) {
             this.wristPosition -= 0.01 * gamepad2.right_stick_y;
             robot.arm.rotateGripper(this.wristPosition);
         } else if (gamepad2.b && !buttons[3]) {
@@ -103,7 +100,7 @@ public class DriveHalo extends OpMode {
     void gripperController() {
         if (gamepad2.a && !buttons[4]) {
             if (armClosed) {
-                robot.arm.releaseBlock(this); // release the block
+                robot.arm.releaseBlock(); // release the block
             } else {
                 robot.arm.gripBlock(); // grab the block
             }
@@ -137,7 +134,7 @@ public class DriveHalo extends OpMode {
     }
 
     void capstoneArmController() {
-        if (gamepad2.dpad_up && gamepad2.x && !buttons[5]) {
+        if ((gamepad2.dpad_up && gamepad2.x) && !buttons[5]) {
             robot.toggleCapstoneArm();
         }
         buttons[5] = gamepad2.dpad_up && gamepad2.x;
