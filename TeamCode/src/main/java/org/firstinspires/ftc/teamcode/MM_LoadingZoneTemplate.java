@@ -58,18 +58,21 @@ public class MM_LoadingZoneTemplate {
         timer.reset();
         int position;
         while (!this.opmode.isStarted()) {
-            position = robot.detectSkystone();
+            //position = robot.detectSkystone();
+            position = robot.detectImage();
             if (timer.time(TimeUnit.SECONDS) > 5) {
                 break;
-            } else if (position == -1) {
+            } else if (position == 0) {
                 skystonePos = Skystone.LEFT;
                 break;
-            } else if (position == 0) {
+            } else if (position == 1) {
                 skystonePos = Skystone.CENTER;
                 break;
-            } else if (position == 1) {
+            } else if (position == 2) {
                 skystonePos = Skystone.RIGHT;
                 break;
+            } else {
+                skystonePos = Skystone.UNKNOWN;
             }
             this.opmode.telemetry.addData("Skystone Position", skystonePos);
             this.opmode.telemetry.update();

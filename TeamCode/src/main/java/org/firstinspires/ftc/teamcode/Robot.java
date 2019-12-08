@@ -28,6 +28,7 @@ public class Robot {
     // Units
     RobotDrive drive;
     RobotArm arm;
+    TensorflowModel tfmodel;
 
     // Motors
     DcMotor rearLeft;
@@ -152,8 +153,9 @@ public class Robot {
         // Units
         this.drive = new RobotDrive(this, this.rearLeft, this.rearRight, this.frontLeft, this.frontRight);
         this.arm = new RobotArm(this, this.armRotate, this.gripperRotateServo, this.grabServo);
+        this.tfmodel = new TensorflowModel();
 
-        // set motor powers to 0 so they don't cause problems
+        // set motor powers to 0 so they don't cause problems because thats what we do bruh moment :)
         this.drive.stopDrive();
         this.waffleMover.setPower(0);
         this.arm.armRotate.setPower(0);
@@ -281,6 +283,27 @@ public class Robot {
     void toggleCapstoneArm() {
         this.capstoneArmPosition = 0.95 - this.capstoneArmPosition;
         capstoneArm.setPosition(this.capstoneArmPosition);
+    }
+
+    void initTFLite() {
+        tfmodel.initTFLite();
+    }
+
+    void closeTFLite() {
+        tfmodel.closeInterpreter();
+    }
+
+    int detectImage() throws InterruptedException {
+        float[] prediction = tfmodel.predictPos();
+        float max_value = -1; // no prediction will be negative
+        int index_of_max = 0;
+        for(int i = 0; i < 3; i++) {
+            if (prediction[i] > max_value) {
+                max_value = prediction[i];
+                index_of_max = i;
+            }
+        }
+        return index_of_max;
     }
 }
 

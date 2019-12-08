@@ -177,13 +177,13 @@ public class WebcamTest {
         float val3 = vals[2];
         /* Find the placement of the skystone once values have been sorted */
         if (skystoneVal == val1) { // Left side
-            pos = -1;
-        } else if (skystoneVal == val2) { // Center
             pos = 0;
-        } else if (skystoneVal == val3) { // Right
+        } else if (skystoneVal == val2) { // Center
             pos = 1;
-        } else {
+        } else if (skystoneVal == val3) { // Right
             pos = 2;
+        } else {
+            pos = 3;
         }
         return pos;
     }
@@ -253,7 +253,7 @@ public class WebcamTest {
                 }
             }
         }
-        return 2; // if something goes wrong
+        return 3; // if something goes wrong
     }
 }
 
