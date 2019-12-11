@@ -33,12 +33,10 @@ public class MM_LoadingZoneTemplate {
             case BLUE:
                 this.stringColor = "blue";
                 this.colorCoefficient = 1;
-                this.frontDistanceSensor = robot.frontDistance;
                 break;
             case RED:
                 this.stringColor = "red";
                 this.colorCoefficient = -1;
-                this.frontDistanceSensor = robot.frontRange;
                 break;
         }
     }
@@ -46,6 +44,7 @@ public class MM_LoadingZoneTemplate {
     public void runOpMode() throws InterruptedException {
         robot.init(this.opmode/*, true*/, true);
         robot.arm.gripBlock();
+        frontDistanceSensor = robot.frontDistance;
 
         int position;
         Skystone lastPosition = Skystone.UNKNOWN;
