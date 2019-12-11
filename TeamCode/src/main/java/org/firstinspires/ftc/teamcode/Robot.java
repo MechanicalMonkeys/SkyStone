@@ -20,6 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 // THIS IS NOT AN OPMODE - IT IS A DEFINING CLASS
@@ -28,7 +29,7 @@ public class Robot {
     // Units
     RobotDrive drive;
     RobotArm arm;
-    TensorflowModel tfmodel;
+    //TensorflowModel tfmodel;
 
     // Motors
     DcMotor rearLeft;
@@ -71,19 +72,13 @@ public class Robot {
     double dWrist = 0.0;
     PIDController PIDWrist = new PIDController(pWrist, iWrist, dWrist);
 
-    // PID Drive Controller
-    double pDrive = 0.0;
-    double iDrive = 0.0;
-    double dDrive = 0.0;
-    PIDController PIDDrive = new PIDController(pDrive, iDrive, dDrive);
-
     // info
     int wafflePosition = -1; // 1 = Up, -1 = Down Waffle mover starts down
     double wafflePower = 0.5;
 
-    double gripperRotatePosition = 1.0; // 1.0 = at a 90 degree angle, 0.8 = parallel to ground
+    double gripperRotatePosition = 1.0; // 1.0 = at a 90 degree angle, 0.9 = parallel to ground
 
-    double capstoneArmPosition = 0.0;
+    double capstoneArmPosition = 1.0;
 
     enum gripperPosition {OPEN, CLOSED}
     gripperPosition gripperPos = gripperPosition.OPEN;
@@ -92,15 +87,13 @@ public class Robot {
     armPosition armPos = armPosition.REST;
     Orientation angles;
 
-
-
     private HardwareMap hwMap = null;
 
     public Robot () {
         // Constructor
     }
 
-    void init (OpMode opmode) throws InterruptedException {
+    void init (OpMode opmode, boolean... doTF) {
         /* Initializes the robot */
 
         hwMap = opmode.hardwareMap;
@@ -153,7 +146,11 @@ public class Robot {
         // Units
         this.drive = new RobotDrive(this, this.rearLeft, this.rearRight, this.frontLeft, this.frontRight);
         this.arm = new RobotArm(this, this.armRotate, this.gripperRotateServo, this.grabServo);
-        this.tfmodel = new TensorflowModel();
+//        if (doTF != null) {
+//            if (doTF[0]) {
+//                this.tfmodel = new TensorflowModel(hwMap);
+//            }
+//        }
 
         // set motor powers to 0 so they don't cause problems because thats what we do bruh moment :)
         this.drive.stopDrive();
@@ -165,8 +162,10 @@ public class Robot {
         this.initImu();
 
         // Vuforia init
-        detector = new WebcamTest();
-        detector.init(hwMap);
+        if (doTF[0]) {
+            detector = new WebcamTest();
+            detector.init(hwMap);
+        }
 
         // NavX Gyro Init
         //this.initNavXGyro(opmode);
@@ -184,6 +183,8 @@ public class Robot {
         }
         if (!hold) {
             this.waffleMover.setPower(0);
+        } else {
+            this.waffleMover.setPower(0.35);
         }
         this.wafflePosition *= -1;
     }
@@ -198,8 +199,8 @@ public class Robot {
 
     void stopLift() { this.liftMotor.setPower(0); }
 
-    int detectSkystone() {
-        return detector.detectSkystonePosition();
+    int detectSkystone(OpMode opmode) {
+        return detector.detectSkystonePosition(opmode);
     }
 
     String getInfo() {
@@ -281,29 +282,31 @@ public class Robot {
     }
 
     void toggleCapstoneArm() {
-        this.capstoneArmPosition = 0.95 - this.capstoneArmPosition;
+        this.capstoneArmPosition = 1 - this.capstoneArmPosition;
         capstoneArm.setPosition(this.capstoneArmPosition);
     }
 
-    void initTFLite() {
-        tfmodel.initTFLite();
+    void initTFLite() throws IOException {
+//        tfmodel.initTFLite();
     }
 
     void closeTFLite() {
-        tfmodel.closeInterpreter();
+//        tfmodel.closeInterpreter();
     }
 
     int detectImage() throws InterruptedException {
-        float[] prediction = tfmodel.predictPos();
-        float max_value = -1; // no prediction will be negative
-        int index_of_max = 0;
-        for(int i = 0; i < 3; i++) {
-            if (prediction[i] > max_value) {
-                max_value = prediction[i];
-                index_of_max = i;
-            }
-        }
-        return index_of_max;
+//        float[] prediction = tfmodel.predictPos();
+//        float max_value = -1; // no prediction will be negative
+//        int index_of_max = 0;
+//        for(int i = 0; i < 3; i++) {
+//            if (prediction[i] > max_value) {
+//                max_value = prediction[i];
+//                index_of_max = i;
+//            }
+//        }
+//        return index_of_max;
+//        //return 4;
+        return -4;
     }
 }
 

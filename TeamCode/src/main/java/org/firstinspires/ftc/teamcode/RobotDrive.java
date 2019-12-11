@@ -64,7 +64,7 @@ public class RobotDrive {
         while (opmode.opModeIsActive() && Math.abs(this.rearLeft.getCurrentPosition()) < NUM_TICKS && Math.abs(this.frontLeft.getCurrentPosition()) < NUM_TICKS
                 && Math.abs(this.rearRight.getCurrentPosition()) < NUM_TICKS && Math.abs(this.frontRight.getCurrentPosition()) < NUM_TICKS) {
             double currentAngle = this.robot.getHeading();
-            double error = Math.tanh((currentAngle - targetAngle) / 40);
+            double error = Math.tanh((currentAngle - targetAngle) / 100);
             this.frontLeft.setPower(power + error);
             this.frontRight.setPower(power - error);
             this.rearLeft.setPower(power + error);
@@ -81,20 +81,32 @@ public class RobotDrive {
     void driveWithDistanceSensor(String mode, double distanceForSensor, double power, DistanceSensor distanceSensor, LinearOpMode opmode) {
         double distance = distanceSensor.getDistance(DistanceUnit.INCH);
         double sign = Math.signum(distance - distanceForSensor);
+        double targetAngle = robot.getHeading();
         switch(mode) {
             case "strafe":
-                this.setStrafe(power * sign);
+                while (distance * sign > distanceForSensor * sign) {
+                    double currentAngle = this.robot.getHeading();
+                    double error = Math.tanh((currentAngle - targetAngle) / 30); // we have to constrain the error between -1 and 1
+                    this.rearLeft.setPower(-power * sign + error);
+                    this.frontLeft.setPower(power * sign + error);
+                    this.rearRight.setPower(power * sign - error);
+                    this.frontRight.setPower(-power * sign - error);
+                    distance = distanceSensor.getDistance(DistanceUnit.INCH);
+                }
                 break;
             case "drive":
-                this.setDrivePower(power * sign);
+                while (distance * sign > distanceForSensor * sign) {
+                    double currentAngle = this.robot.getHeading();
+                    double error = Math.tanh((currentAngle - targetAngle) / 100);
+                    this.frontLeft.setPower(power * sign + error);
+                    this.frontRight.setPower(power * sign - error);
+                    this.rearLeft.setPower(power * sign + error);
+                    this.rearRight.setPower(power * sign - error);
+                    opmode.telemetry.addData("Angle of Robot", currentAngle);
+                    opmode.telemetry.update();
+                    distance = distanceSensor.getDistance(DistanceUnit.INCH);
+                }
                 break;
-            default:
-                return;
-        }
-        while (distance * sign > distanceForSensor * sign) {
-            opmode.telemetry.addData("Distance", distance);
-            opmode.telemetry.update();
-            distance = distanceSensor.getDistance(DistanceUnit.INCH);
         }
         this.stopDrive();
     }
@@ -158,30 +170,76 @@ public class RobotDrive {
     }
 
     void driveUntilColor(String mode, double power, String color, LinearOpMode opmode) {
+        double targetAngle = robot.getHeading();
         switch(mode) {
             case "strafe":
-                this.setStrafe(power);
+                switch(color) {
+                    case "red":
+                        while (opmode.opModeIsActive() && this.robot.insideColor.red() < 4000) {
+                            double currentAngle = this.robot.getHeading();
+                            double error = Math.tanh((currentAngle - targetAngle) / 30); // we have to constrain the error between -1 and 1
+                            this.rearLeft.setPower(-power + error);
+                            this.frontLeft.setPower(power + error);
+                            this.rearRight.setPower(power - error);
+                            this.frontRight.setPower(-power - error);
+                        }
+                        break;
+                    case "blue":
+                        while (opmode.opModeIsActive() && this.robot.insideColor.blue() < 4000) {
+                            double currentAngle = this.robot.getHeading();
+                            double error = Math.tanh((currentAngle - targetAngle) / 30); // we have to constrain the error between -1 and 1
+                            this.rearLeft.setPower(-power + error);
+                            this.frontLeft.setPower(power + error);
+                            this.rearRight.setPower(power - error);
+                            this.frontRight.setPower(-power - error);
+                        }
+                        break;
+                }
                 break;
             case "drive":
-                this.setDrivePower(power);
+                /* drives forward a certain distance(in) using encoders */
+
+                // calculate ticks
+                long NUM_TICKS_LONG = StrictMath.round(this.robot.TICKS_PER_INCH * 999999);
+                int NUM_TICKS = (int) NUM_TICKS_LONG;
+
+                // reset encoders
+                this.setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                // set mode
+                this.setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                switch(color) {
+                    case "red":
+                        // drive
+                        while (opmode.opModeIsActive() && this.robot.insideColor.red() < 4000) {
+                            double currentAngle = this.robot.getHeading();
+                            double error = Math.tanh((currentAngle - targetAngle) / 40);
+                            this.frontLeft.setPower(power + error);
+                            this.frontRight.setPower(power - error);
+                            this.rearLeft.setPower(power + error);
+                            this.rearRight.setPower(power - error);
+                            opmode.telemetry.addData("Angle of Robot", currentAngle);
+                            opmode.telemetry.update();
+                        }
+                        // stop driving
+                        break;
+                    case "blue":
+                        // drive
+                        while (opmode.opModeIsActive() && this.robot.insideColor.blue() < 4000) {
+                            double currentAngle = this.robot.getHeading();
+                            double error = Math.tanh((currentAngle - targetAngle) / 40);
+                            this.frontLeft.setPower(power + error);
+                            this.frontRight.setPower(power - error);
+                            this.rearLeft.setPower(power + error);
+                            this.rearRight.setPower(power - error);
+                            opmode.telemetry.addData("Angle of Robot", currentAngle);
+                            opmode.telemetry.update();
+                        }
+                        break;
+                }
                 break;
             default:
                 return;
-        }
-        ElapsedTime timer = new ElapsedTime();
-        timer.reset();
-        switch(color) {
-            case "red":
-                while(opmode.opModeIsActive() && this.robot.insideColor.red() < 4000) {
-                    opmode.telemetry.addData("Red", this.robot.insideColor.red());
-                    opmode.telemetry.update();
-                }
-                break;
-            case "blue":
-                while(opmode.opModeIsActive() && this.robot.insideColor.blue() < 4000) {
-                    opmode.telemetry.addData("Blue", this.robot.insideColor.blue());
-                    opmode.telemetry.update();
-                }
         }
         this.stopDrive();
     }

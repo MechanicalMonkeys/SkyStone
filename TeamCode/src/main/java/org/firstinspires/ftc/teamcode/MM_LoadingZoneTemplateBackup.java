@@ -58,7 +58,7 @@ public class MM_LoadingZoneTemplateBackup {
         timer.reset();
         int position;
         while (!this.opmode.isStarted()) {
-            position = robot.detectSkystone();
+            position = robot.detectSkystone(this.opmode);
             if (timer.time(TimeUnit.SECONDS) > 5) {
                 break;
             } else if (position == -1) {
@@ -71,8 +71,8 @@ public class MM_LoadingZoneTemplateBackup {
                 skystonePos = Skystone.RIGHT;
                 break;
             }
-            this.opmode.telemetry.addData("Skystone Position", skystonePos);
-            this.opmode.telemetry.update();
+//            this.opmode.telemetry.addData("Skystone Position", skystonePos);
+//            this.opmode.telemetry.update();
             this.opmode.idle();
         }
 

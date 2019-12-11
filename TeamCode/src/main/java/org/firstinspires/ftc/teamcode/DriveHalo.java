@@ -18,20 +18,17 @@ public class DriveHalo extends OpMode {
     boolean slowMode = false; // activate slowMode if both joysticks are pushed down
     boolean strafeMode = false;
     Boolean[] buttons = new Boolean[7];
-    double wristPosition = 0.8;
+    double wristPosition = 0.85;
 
     @Override
     public void init() {
-        try {
-            robot.init(this);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        robot.init(this, false);
         gamepad1.setJoystickDeadzone(deadZone);
         for (int i = 0; i < buttons.length; i++) {
             buttons[i] = false;
         }
         robot.arm.rotateGripper(wristPosition);
+        robot.capstoneArm.setPosition(1.0);
 
         telemetry.addData("Initialized", "Ready to start");
         telemetry.update();

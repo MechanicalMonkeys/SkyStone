@@ -16,7 +16,7 @@ public class DistanceSensorMethods implements DistanceSensorConstants {
 
     @Override
     public void init(OpMode opmode) throws InterruptedException {
-        robot.init(opmode);
+        robot.init(opmode, false);
         imu.init(opmode, true);
     }
 

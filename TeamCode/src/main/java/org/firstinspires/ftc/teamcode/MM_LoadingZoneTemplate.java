@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-import java.util.concurrent.TimeUnit;
 
 public class MM_LoadingZoneTemplate {
 
@@ -24,6 +22,7 @@ public class MM_LoadingZoneTemplate {
     private double distanceToGoBack;
     private double distanceToFoundation = 31; // distance to skybridge from bridge tape
     private int stepNumber = 1;
+    private DistanceSensor frontDistanceSensor;
 
     public MM_LoadingZoneTemplate(ParkingPosition parkingPos, AllianceColor color, LinearOpMode opmode, Robot robot) {
         this.parkingPos = parkingPos;
@@ -33,53 +32,49 @@ public class MM_LoadingZoneTemplate {
         switch(this.allianceColor) {
             case BLUE:
                 this.stringColor = "blue";
+                this.colorCoefficient = 1;
+                this.frontDistanceSensor = robot.frontDistance;
                 break;
             case RED:
                 this.stringColor = "red";
-                break;
-        }
-        switch(this.allianceColor) {
-            case BLUE:
-                this.colorCoefficient = 1;
-                break;
-            case RED:
                 this.colorCoefficient = -1;
+                this.frontDistanceSensor = robot.frontRange;
                 break;
         }
     }
 
     public void runOpMode() throws InterruptedException {
-        robot.init(this.opmode);
+        robot.init(this.opmode/*, true*/, true);
         robot.arm.gripBlock();
 
-        // timer
-        ElapsedTime timer = new ElapsedTime();
-        // Detect skystone with camera
-        timer.reset();
         int position;
+        Skystone lastPosition = Skystone.UNKNOWN;
         while (!this.opmode.isStarted()) {
-            //position = robot.detectSkystone();
-            position = robot.detectImage();
-            if (timer.time(TimeUnit.SECONDS) > 5) {
+            position = robot.detectSkystone(this.opmode);
+            //position = robot.detectImage();
+            //position = 0;
+            /*if (timer.time(TimeUnit.SECONDS) > 5) {
                 break;
-            } else if (position == 0) {
+            } else */if (position == 0) {
                 skystonePos = Skystone.LEFT;
-                break;
             } else if (position == 1) {
                 skystonePos = Skystone.CENTER;
-                break;
             } else if (position == 2) {
                 skystonePos = Skystone.RIGHT;
-                break;
             } else {
                 skystonePos = Skystone.UNKNOWN;
             }
-            this.opmode.telemetry.addData("Skystone Position", skystonePos);
+            if (skystonePos != Skystone.UNKNOWN) {
+                lastPosition = skystonePos;
+            }
+            this.opmode.telemetry.addData("Skystone Position", skystonePos + " " + lastPosition);
             this.opmode.telemetry.update();
-            this.opmode.idle();
+            //this.opmode.idle();
         }
 
-        if (!opmode.isStarted()) {
+        if (opmode.isStarted()) {
+            //robot.closeTFLite();
+            skystonePos = lastPosition;
             if (skystonePos == Skystone.UNKNOWN) {
                 skystonePos = Skystone.CENTER;
             }
@@ -95,7 +90,7 @@ public class MM_LoadingZoneTemplate {
             try {
                 while (this.opmode.opModeIsActive()) {
                     this.linearOpmodeSteps();
-                    //this.opmode.idle();
+                    this.opmode.idle();
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -108,8 +103,6 @@ public class MM_LoadingZoneTemplate {
     private void linearOpmodeSteps() throws InterruptedException {
         switch (stepNumber) {
             case 1:
-                this.opmode.telemetry.addData("Skystone Position", skystonePos);
-                this.opmode.telemetry.update();
                 /*robot.setDrivePower(speed);
                 double distanceToBlock = robot.frontDistance.getDistance(DistanceUnit.INCH);
                 while (distanceToBlock > 11.5) {
@@ -120,17 +113,17 @@ public class MM_LoadingZoneTemplate {
                 robot.stopDrive();
                  */
                 // put arm down
-                robot.drive.driveForwardDistance(6, 0.5, this.opmode);
+                robot.drive.driveForwardDistance(4, 0.5, this.opmode);
                 robot.arm.bringArmDown(this.opmode);
-                robot.arm.rotateGripper(0.9);
+                robot.arm.rotateGripper(1.0);
                 robot.arm.releaseBlock();
                 this.stepNumber++;
                 break;
             case 2:
-                if (robot.frontDistance.getDistance(DistanceUnit.INCH) == 0) {
+                if (this.frontDistanceSensor.getDistance(DistanceUnit.INCH) == 0) {
                     this.driveWithoutDistanceSensor();
                 } else {
-                    robot.drive.driveWithDistanceSensor("drive",15.1, 0.25, this.robot.frontDistance, this.opmode);
+                    robot.drive.driveWithDistanceSensor("drive",15.1, 0.25, this.frontDistanceSensor, this.opmode);
                 }
                 Thread.sleep(0);
                 switch (skystonePos) {
@@ -145,7 +138,7 @@ public class MM_LoadingZoneTemplate {
                     case CENTER:
                         distanceToGoBack = 30;
                         distanceToBuildZone = 30;
-                        robot.drive.driveWithDistanceSensor("strafe",26, 0.4 * colorCoefficient, robot.leftRange, this.opmode);
+                        robot.drive.driveWithDistanceSensor("strafe",28, 0.4 * colorCoefficient, robot.leftRange, this.opmode);
                         break;
                     case RIGHT:
                         distanceToGoBack = 30 + (colorCoefficient - 1) * 3;
@@ -156,8 +149,9 @@ public class MM_LoadingZoneTemplate {
                         //robot.turnRight(-0.25, 250);
                         break;
                 }
-                if (robot.frontDistance.getDistance(DistanceUnit.INCH) > 13) {
-                    robot.drive.driveWithDistanceSensor("drive", 13, 0.25, this.robot.frontDistance, this.opmode);
+                robot.drive.turnToGlobalPosition(0.25, 0, this.opmode);
+                if (this.frontDistanceSensor.getDistance(DistanceUnit.INCH) > 13) {
+                    robot.drive.driveWithDistanceSensor("drive", 13, 0.25, this.frontDistanceSensor, this.opmode);
                 }
                 this.stepNumber++;
                 break;
@@ -168,7 +162,7 @@ public class MM_LoadingZoneTemplate {
                 break;
             case 4:
                 // back up
-                robot.drive.driveForwardDistance(0, -speed, this.opmode);
+                robot.drive.driveForwardDistance(4, -speed, this.opmode);
                 // turn towards skybridge
                 robot.drive.turnToGlobalPosition(0.35, 90 * colorCoefficient, this.opmode);
                 robot.arm.rotateGripper(1.0);
@@ -189,8 +183,8 @@ public class MM_LoadingZoneTemplate {
                 // correct position - obviously its in the code
                 robot.drive.turnToGlobalPosition(0.25, 90 * colorCoefficient, this.opmode);
                 // drive to second Skystone
-                robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 12, -speed, this.opmode);
-                robot.arm.rotateGripper(0.9);
+                robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 11, -speed, this.opmode);
+                robot.arm.rotateGripper(1.0);
                 // turn
                 robot.drive.turnToGlobalPosition(0.25, 0, this.opmode);
                 if ((this.skystonePos == Skystone.LEFT && this.allianceColor == AllianceColor.RED) ||
@@ -203,8 +197,9 @@ public class MM_LoadingZoneTemplate {
             case 7:
                 // go to block
                 if (!((this.skystonePos == Skystone.LEFT && this.allianceColor == AllianceColor.RED) ||
-                        (this.skystonePos == Skystone.RIGHT && this.allianceColor == AllianceColor.BLUE))) {
-                    robot.drive.driveWithDistanceSensor("drive",13, 0.25, this.robot.frontDistance, this.opmode);
+                        (this.skystonePos == Skystone.RIGHT && this.allianceColor == AllianceColor.BLUE)) &&
+                        this.frontDistanceSensor.getDistance(DistanceUnit.INCH) > 13) {
+                    robot.drive.driveWithDistanceSensor("drive",13, 0.25, this.frontDistanceSensor, this.opmode);
                 }
                 this.stepNumber++;
                 break;
@@ -237,15 +232,17 @@ public class MM_LoadingZoneTemplate {
                 Thread.sleep(500);
                 switch(this.parkingPos) {
                     case FAR:
+                        robot.drive.driveForwardDistance(25, -speed, this.opmode);
                         robot.drive.strafeTime(-0.6 * colorCoefficient, 2300, this.opmode);
                         break;
                     case CLOSE:
                         //robot.drive.strafeTime(0.6 * colorCoefficient, 700, this.opmode);
                         robot.drive.strafeTime(-0.4 * colorCoefficient, 250, this.opmode);
+                        robot.drive.driveForwardDistance(25, -speed, this.opmode);
                         break;
                 }
-                robot.drive.turnToGlobalPosition(0.25, 90 * colorCoefficient, this.opmode);
-                robot.drive.driveForwardDistance(20, -speed, this.opmode);
+                //robot.drive.turnToGlobalPosition(0.25, 90 * colorCoefficient, this.opmode);
+                Thread.sleep(500);
                 this.stepNumber++;
                 break;
             case 11: // everything is stopped - thanos c. 2019

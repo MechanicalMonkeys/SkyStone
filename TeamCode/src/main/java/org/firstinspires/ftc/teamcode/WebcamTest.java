@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -15,7 +16,7 @@ public class WebcamTest {
     private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Stone";
     private static final String LABEL_SECOND_ELEMENT = "Skystone";
-    private static final double MIN_CONFIDENCE = 0.65;
+    private static final double MIN_CONFIDENCE = 0.3;
     private static final int NUM_BLOCKS = 3;
     int cameraMonitorViewId;
 
@@ -36,7 +37,7 @@ public class WebcamTest {
      * and paste it in to your code on the next line, between the double quotes.
      */
     private static final String VUFORIA_KEY =
-            "AWkYdzb/////AAABmWsW4urs2EjOmK3aBEWJEFxEbGHh6an3+HFdzPIUoFs9oQJRm34hA528YQTZohbGdiZH5Gyot22SPfkQyhOgQMXlgfiQ0aTeNMSlD/FwWJ9kAjP1vIfFYnhEs9TjmpmPxKQD9OsxeA7hoKWgQWrOlNu0yG21oEWsr3FEh0rbAazVcNW27TFw5X1rK9mRdZT1/acPcntsbM74Sr/iy/nrp9y/rufNfwpzhnzkgFSJ6k5+6u6VEpE5Rg6M8kM6kfp+SCVNtqeYuiMV3RvKHoKuG4k+IOxd4uteb33+w8VNbIzoCMhuEP0iyb5hX+t5b6Tg6syLzkD5q9znjePjCxWx0MTFNtNe87Yvh2NBCYEwuOEo";
+            "ARuYIcn/////AAABmQk2dFO/OUiulDemwSzvz5IhKlYZ2CmzXW7BPOWkTFPL9s3RAjUawH6QIgjWexqwmjcJsc4i0OwJLUjjpS2u9AWLZHnehVawjKWrPmar8c9gF8OGRWBDod9yM1jhUe2aSf1a31KPrUNpATyt+3dBgxWba3nY8Yhpqt8xiUjucSkHOY5iJ9KEOSt1OMGXmX65FPsptoVSnZWq+kRW1QQ9NBGi6+uEeODyy27XLeDDOw/Y5QuRv3AUqCsSzgc0af+SE0OL/ZRJhDt+5Xal1Y7UCzbF7paGA8RjnY8+ZfJQx1xcbf1lJZ5nmaQ4EaOBwrUUYxF20XL3gpbO4Z5B6yNml1olDk4myGif9NrW2KOWllx4";
 
     /*
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -52,7 +53,7 @@ public class WebcamTest {
      */
     private TFObjectDetector tfod;
 
-//    public void runOpMode() {
+    //    public void runOpMode() {
 //        // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
 //        // first.
 //        initVuforia();
@@ -138,7 +139,7 @@ public class WebcamTest {
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod(hwMap);
-        } else { }
+        }
     }
 
     private void InsertionSort(float[] arr)
@@ -218,7 +219,7 @@ public class WebcamTest {
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
     }
 
-    public int detectSkystonePosition() {
+    public int detectSkystonePosition(OpMode opmode) {
 
         /**
          * Activate TensorFlow Object Detection before we wait for the start command.
@@ -235,20 +236,20 @@ public class WebcamTest {
                     // step through the list of recognitions and display boundary info.
                     int i = 0;
                     for (Recognition recognition : updatedRecognitions) {
-                        /*
-                        telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
-                        telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+
+                        opmode.telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                        opmode.telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
                                 recognition.getLeft(), recognition.getTop());
-                        telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+                        opmode.telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
                                 recognition.getRight(), recognition.getBottom());
-                                */
+
                         label_vals[i] = recognition.getLabel();
                         left_vals[i] = recognition.getLeft();
                         i++; // Bug Fix - Counter Increment
                     }
                     int position;
                     position = getSkystonePosition(label_vals, left_vals);
-                    tfod.shutdown();
+                    //tfod.shutdown();
                     return position;
                 }
             }

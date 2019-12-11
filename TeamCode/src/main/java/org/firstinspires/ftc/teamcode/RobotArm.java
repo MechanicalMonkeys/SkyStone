@@ -63,20 +63,8 @@ public class RobotArm {
         }
     }
 
-    void foldArmBack(LinearOpMode opmode) {
-        if (this.robot.armPos == Robot.armPosition.ACTIVE) { // we only do something if the arm is active
-            if (this.robot.gripperRotatePosition == -1) {
-                // we rotate the gripper so it is perpendicular to the ground
-                this.rotateGripper(0.5);
-            }
-            // we rotate the arm 225 degrees
-            this.moveArmRotate(3100, -0.6, opmode);
-            this.robot.armPos = Robot.armPosition.REST;
-        }
-    }
-
     void gripBlock() {
-        this.grabServo.setPosition(0);
+        this.grabServo.setPosition(0.2);
         this.robot.gripperPos = Robot.gripperPosition.CLOSED;
     }
 
@@ -89,11 +77,11 @@ public class RobotArm {
         this.bringArmDown(opmode); // bring arm down
         Thread.sleep(500);
         // we rotate the gripper so it is parallel to the ground
-        this.rotateGripper(0.5);
+        this.rotateGripper(0.9);
         this.gripBlock(); // grab the block
         Thread.sleep(500);
         // we rotate the gripper back
-        this.rotateGripper(0.9);
+        this.rotateGripper(1.0);
     }
 
     void setArmRotatePower(double power) {
@@ -103,16 +91,16 @@ public class RobotArm {
     void stopArmRotate() { this.setArmRotatePower(0); }
 
     void toggleWrist() {
-        this.robot.gripperRotatePosition = 1.8 - this.robot.gripperRotatePosition;
+        this.robot.gripperRotatePosition = 1.85 - this.robot.gripperRotatePosition;
         this.rotateGripper(this.robot.gripperRotatePosition);
     }
 
     void grabBlockAuto() throws InterruptedException {
         // grab block
-        this.rotateGripper(0.8);
+        this.rotateGripper(0.85);
         Thread.sleep(500);
         this.gripBlock();
         Thread.sleep(500);
-        this.rotateGripper(0.9);
+        this.rotateGripper(1.0);
     }
 }
