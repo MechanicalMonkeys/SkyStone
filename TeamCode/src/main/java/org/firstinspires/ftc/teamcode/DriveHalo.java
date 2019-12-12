@@ -49,9 +49,9 @@ public class DriveHalo extends OpMode {
 
     void liftController() {
         double ry = gamepad1.right_stick_y;
-        if (ry > 0.2) { // lift logic
+        if (ry > 0.5) { // lift logic
             robot.liftDown();
-        } else if (ry < -0.2) {
+        } else if (ry < -0.5) {
             robot.liftUp();
         } else {
             robot.stopLift();
@@ -89,6 +89,7 @@ public class DriveHalo extends OpMode {
             robot.arm.rotateGripper(this.wristPosition);
         } else if (gamepad2.b && !buttons[3]) {
             robot.arm.toggleWrist();
+            wristPosition = robot.arm.gripperRotateServo.getPosition();
         }
         buttons[3] = gamepad2.b;
 

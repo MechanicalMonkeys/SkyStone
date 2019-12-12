@@ -56,7 +56,7 @@
 //        }
 //        ByteBuffer vbb = ByteBuffer.allocateDirect(12);
 //        outputdata = vbb.asFloatBuffer();
-//        outputdata.put(data);
+//        //outputdata.put(data);
 //
 //        // Creates the output tensor and its processor.
 //        /*output = TensorBuffer.createFixedSize(shape, outputDatatype);

@@ -64,7 +64,7 @@ public class RobotArm {
     }
 
     void gripBlock() {
-        this.grabServo.setPosition(0.2);
+        this.grabServo.setPosition(0.6);
         this.robot.gripperPos = Robot.gripperPosition.CLOSED;
     }
 
@@ -98,9 +98,9 @@ public class RobotArm {
     void grabBlockAuto() throws InterruptedException {
         // grab block
         this.rotateGripper(0.85);
-        Thread.sleep(500);
+        Thread.sleep(250);
         this.gripBlock();
-        Thread.sleep(500);
+        Thread.sleep(250);
         this.rotateGripper(1.0);
     }
 }

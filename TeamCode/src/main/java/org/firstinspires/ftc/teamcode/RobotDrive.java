@@ -84,7 +84,7 @@ public class RobotDrive {
         double targetAngle = robot.getHeading();
         switch(mode) {
             case "strafe":
-                while (distance * sign > distanceForSensor * sign) {
+                while (opmode.opModeIsActive() && distance * sign > distanceForSensor * sign) {
                     double currentAngle = this.robot.getHeading();
                     double error = Math.tanh((currentAngle - targetAngle) / 30); // we have to constrain the error between -1 and 1
                     this.rearLeft.setPower(-power * sign + error);
@@ -95,14 +95,14 @@ public class RobotDrive {
                 }
                 break;
             case "drive":
-                while (distance * sign > distanceForSensor * sign) {
+                while (opmode.opModeIsActive() && distance * sign > distanceForSensor * sign) {
                     double currentAngle = this.robot.getHeading();
                     double error = Math.tanh((currentAngle - targetAngle) / 100);
                     this.frontLeft.setPower(power * sign + error);
                     this.frontRight.setPower(power * sign - error);
                     this.rearLeft.setPower(power * sign + error);
                     this.rearRight.setPower(power * sign - error);
-                    opmode.telemetry.addData("Angle of Robot", currentAngle);
+                    opmode.telemetry.addData("Distance : Angle", distance + " : " + currentAngle);
                     opmode.telemetry.update();
                     distance = distanceSensor.getDistance(DistanceUnit.INCH);
                 }

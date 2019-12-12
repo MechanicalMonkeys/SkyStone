@@ -165,9 +165,9 @@ public class MM_LoadingZoneTemplate {
                 // turn towards skybridge
                 robot.drive.turnToGlobalPosition(0.35, 90 * colorCoefficient, this.opmode);
                 robot.arm.rotateGripper(1.0);
-                robot.drive.strafeTime(0.4 * colorCoefficient, 500, this.opmode);
+                robot.drive.strafeTime(0.4 * colorCoefficient, 400, this.opmode);
                 // drive to foundation
-                robot.drive.driveForwardDistance(distanceToFoundation + distanceToBuildZone - 12, speed, this.opmode);
+                robot.drive.driveForwardDistance(distanceToFoundation + distanceToBuildZone - 8, speed, this.opmode);
                 this.stepNumber++;
                 break;
             case 5:
@@ -182,23 +182,20 @@ public class MM_LoadingZoneTemplate {
                 // correct position - obviously its in the code
                 robot.drive.turnToGlobalPosition(0.25, 90 * colorCoefficient, this.opmode);
                 // drive to second Skystone
-                robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 11, -speed, this.opmode);
+                robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 7, -speed, this.opmode);
                 robot.arm.rotateGripper(1.0);
-                // turn
-                robot.drive.turnToGlobalPosition(0.25, 0, this.opmode);
-                if ((this.skystonePos == Skystone.LEFT && this.allianceColor == AllianceColor.RED) ||
-                        (this.skystonePos == Skystone.RIGHT && this.allianceColor == AllianceColor.BLUE)) {
-                    robot.drive.turnToGlobalPosition(0.25, -17 * colorCoefficient, this.opmode);
-                    robot.drive.driveForwardDistance(8, 0.25, this.opmode);
-                }
                 this.stepNumber++;
                 break;
             case 7:
-                // go to block
-                if (!((this.skystonePos == Skystone.LEFT && this.allianceColor == AllianceColor.RED) ||
-                        (this.skystonePos == Skystone.RIGHT && this.allianceColor == AllianceColor.BLUE)) &&
-                        this.frontDistanceSensor.getDistance(DistanceUnit.INCH) > 13) {
-                    robot.drive.driveWithDistanceSensor("drive",13, 0.25, this.frontDistanceSensor, this.opmode);
+                // turn
+                robot.drive.turnToGlobalPosition(0.25, 0, this.opmode);
+                if (this.frontDistanceSensor.getDistance(DistanceUnit.INCH) > 14) {
+                    robot.drive.driveWithDistanceSensor("drive",14, 0.25, this.frontDistanceSensor, this.opmode);
+                }
+                if ((this.skystonePos == Skystone.LEFT && this.allianceColor == AllianceColor.RED) ||
+                        (this.skystonePos == Skystone.RIGHT && this.allianceColor == AllianceColor.BLUE)) {
+                    robot.drive.turnToGlobalPosition(0.25, -27 * colorCoefficient, this.opmode);
+                    robot.drive.driveForwardDistance(1, 0.25, this.opmode);
                 }
                 this.stepNumber++;
                 break;
@@ -208,7 +205,7 @@ public class MM_LoadingZoneTemplate {
                 robot.arm.grabBlockAuto();
                 if ((this.skystonePos == Skystone.LEFT && this.allianceColor == AllianceColor.RED) ||
                         (this.skystonePos == Skystone.RIGHT && this.allianceColor == AllianceColor.BLUE)) {
-                    robot.drive.driveForwardDistance(6, -0.25, this.opmode);
+                    robot.drive.driveForwardDistance(4, -0.25, this.opmode);
                 } else {
                     robot.drive.driveForwardDistance(3, -0.25, this.opmode);
                 }
@@ -217,10 +214,10 @@ public class MM_LoadingZoneTemplate {
             case 9:
                 // drive to foundation to drop the block off -  aight bruh im bouta head out now
                 Thread.sleep(0);
-                robot.drive.driveForwardDistance(0, -speed, this.opmode);
+                robot.drive.driveForwardDistance(3, -speed, this.opmode);
                 robot.drive.turnToGlobalPosition(0.4, 90 * colorCoefficient, this.opmode);
                 robot.arm.rotateGripper(1.0);
-                robot.drive.strafeTime(0.4 * colorCoefficient, 600, this.opmode);
+                robot.drive.strafeTime(0.4 * colorCoefficient, 400, this.opmode);
                 robot.drive.turnToGlobalPosition(0.25, 90 * colorCoefficient, this.opmode);
                 robot.drive.driveForwardDistance(distanceToBuildZone + distanceToFoundation + 9, speed, this.opmode);
                 robot.arm.releaseBlock();
@@ -232,11 +229,11 @@ public class MM_LoadingZoneTemplate {
                 switch(this.parkingPos) {
                     case FAR:
                         robot.drive.driveForwardDistance(25, -speed, this.opmode);
-                        robot.drive.strafeTime(-0.6 * colorCoefficient, 2300, this.opmode);
+                        robot.drive.strafeTime(-0.6 * colorCoefficient, 2000, this.opmode);
                         break;
                     case CLOSE:
                         //robot.drive.strafeTime(0.6 * colorCoefficient, 700, this.opmode);
-                        robot.drive.strafeTime(-0.4 * colorCoefficient, 250, this.opmode);
+                        robot.drive.strafeTime(-0.4 * colorCoefficient, 150, this.opmode);
                         robot.drive.driveForwardDistance(25, -speed, this.opmode);
                         break;
                 }

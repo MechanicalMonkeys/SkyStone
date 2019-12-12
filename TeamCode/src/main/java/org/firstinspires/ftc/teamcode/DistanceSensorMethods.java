@@ -109,7 +109,6 @@ public class DistanceSensorMethods implements DistanceSensorConstants {
     @SuppressLint("DefaultLocale")
     public void outputValues(OpMode opmode, Robot robot) {
         opmode.telemetry.addData("Forward Distance", String.format("%.01f cm", robot.frontDistance.getDistance(DistanceUnit.CM)));
-        opmode.telemetry.addData("Back Distance", String.format("%.01f cm", robot.rearDistance.getDistance(DistanceUnit.CM)));
         opmode.telemetry.addData("Left Distance", String.format("%.01f cm", robot.leftDistance.getDistance(DistanceUnit.CM)));
         //opmode.telemetry.addData("Right Distance", String.format("%.01f cm", robot.rightDistance.getDistance(DistanceUnit.CM)));
 

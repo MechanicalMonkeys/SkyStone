@@ -48,7 +48,7 @@ public class Robot {
     NavxMicroNavigationSensor navxMicro;
     BNO055IMU imu;
 
-    DistanceSensor frontDistance, leftDistance, rearDistance;
+    DistanceSensor frontDistance, leftDistance;
     ModernRoboticsI2cRangeSensor leftRange, frontRange;
     ColorSensor insideColor;
     TouchSensor rearTouch;
@@ -133,7 +133,6 @@ public class Robot {
         // Sensor init
         this.frontDistance = hwMap.get(DistanceSensor.class, "frontDistance");
         this.leftDistance = hwMap.get(DistanceSensor.class, "leftDistance");
-        this.rearDistance = hwMap.get(DistanceSensor.class, "rearDistance");
         this.leftRange = hwMap.get(ModernRoboticsI2cRangeSensor.class, "leftRange");
         this.frontRange = hwMap.get(ModernRoboticsI2cRangeSensor.class, "frontRange");
 
