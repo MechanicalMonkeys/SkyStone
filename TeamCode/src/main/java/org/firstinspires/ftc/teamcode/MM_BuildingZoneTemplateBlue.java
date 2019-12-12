@@ -45,7 +45,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         double initialHeading = imu.getHeading();
 
         // Prepare the manipulator
-        robot.moveWaffleMover();
+        robot.moveWaffleMover(false);
 
         // Go forward to prevent rubbing with wall
         while (readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 0.0, 255.0) < 60.0) {
@@ -66,7 +66,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         }
 
         // Grab foundation
-        robot.moveWaffleMover();
+        robot.moveWaffleMover(true);
 
         // Pull foundation into building site
         //driveWithDistanceSensor(0.2, 15.0, DistanceUnit.CM, robot.frontRange);
@@ -78,7 +78,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         robot.drive.stopDrive();
         Thread.sleep(1000);
 
-        robot.moveWaffleMover();
+        robot.moveWaffleMover(false);
 
         // Gyro correction
         imu.turnToPosition(0.2, initialHeading, imu.LEFT);
@@ -89,7 +89,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
             imu.turnToPosition(0.2, initialHeading, imu.LEFT);
             robot.drive.driveForwardDistance(18, -0.4, opmode);
-            robot.moveWaffleMover();
+            robot.moveWaffleMover(false);
         }
 
         // Strafe 80 cm, then drive forward 0.5 inch
@@ -125,7 +125,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
         // Retract manipulator
         if (parkingPos == ParkingPosition.FAR) {
-            robot.moveWaffleMover();
+            robot.moveWaffleMover(false);
         }
     }
 
