@@ -45,7 +45,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         double initialHeading = imu.getHeading();
 
         // Prepare the manipulator
-        robot.moveWaffleMover(false);
+        robot.moveWaffleMover();
 
         // Go forward to prevent rubbing with wall
         while (readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 0.0, 255.0) < 60.0) {
@@ -66,19 +66,19 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         }
 
         // Grab foundation
-        robot.moveWaffleMover(true);
+        robot.moveWaffleMover();
 
         // Pull foundation into building site
         //driveWithDistanceSensor(0.2, 15.0, DistanceUnit.CM, robot.frontRange);
         while (readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 2.0, 255.0, 10.0) > 8.0) {
-            robot.drive.setDrivePower(0.7);
+            robot.drive.setDrivePower(0.3);
         }
 
         // Debug stuff
         robot.drive.stopDrive();
         Thread.sleep(1000);
 
-        robot.moveWaffleMover(false);
+        robot.moveWaffleMover();
 
         // Gyro correction
         imu.turnToPosition(0.2, initialHeading, imu.LEFT);
@@ -89,8 +89,13 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
             imu.turnToPosition(0.2, initialHeading, imu.LEFT);
             robot.drive.driveForwardDistance(18, -0.4, opmode);
-            robot.moveWaffleMover(false);
+            robot.moveWaffleMover();
         }
+
+        // Strafe 80 cm, then drive forward 0.5 inch
+        robot.drive.setStrafe(-speed * colorCoefficient);
+        while (robot.leftRange.getDistance(DistanceUnit.CM) < 80.0);
+        robot.drive.driveForwardDistance(0.5, -0.2, this.opmode);
 
         // Set up the fail-safe timer
         double nanoFactor = 1e+9;
@@ -120,7 +125,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
         // Retract manipulator
         if (parkingPos == ParkingPosition.FAR) {
-            robot.moveWaffleMover(false);
+            robot.moveWaffleMover();
         }
     }
 
@@ -135,4 +140,3 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         }
     }
 }
-//./././././././././././././././././/./././././././././.
