@@ -17,6 +17,7 @@ public class DriveHalo extends OpMode {
     private boolean armClosed = false;
     boolean slowMode = false; // activate slowMode if both joysticks are pushed down
     boolean strafeMode = false;
+    boolean turboMode = false;
     Boolean[] buttons = new Boolean[7];
     double wristPosition = 0.85;
 
@@ -59,10 +60,14 @@ public class DriveHalo extends OpMode {
     }
 
     void waffleController() {
+        if (gamepad1.x && !buttons[6]) {
+            robot.moveWaffleMover(true);
+        }
         if (gamepad1.y && !buttons[0]) {
             robot.moveWaffleMover(false);
         }
         buttons[0] = gamepad1.y;
+        buttons[6] = gamepad1.x;
     }
 
     void armController() {
@@ -109,15 +114,21 @@ public class DriveHalo extends OpMode {
 
     void driveController() {
         this.slowMode = gamepad1.right_bumper;
+        this.turboMode = gamepad1.left_trigger > 0.5 && gamepad1.right_trigger > 0.5;
         this.strafeMode = gamepad1.left_bumper;
 
         if (this.slowMode) {
             speedControl = 0.25;
+        } else if (this.turboMode) {
+            speedControl = 1;
         } else {
             speedControl = 0.5;
         }
 
         if (this.strafeMode) {
+            if (this.slowMode) {
+                speedControl = 0.35;
+            }
             robot.drive.setStrafe(speedControl * gamepad1.right_stick_x);
         } else {
             double drive = speedControl * -gamepad1.left_stick_y; // forward
