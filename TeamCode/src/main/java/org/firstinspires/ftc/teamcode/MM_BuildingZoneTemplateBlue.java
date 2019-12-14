@@ -17,7 +17,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
     public MM_BuildingZoneTemplateBlue(ParkingPosition parkingPos, AllianceColor color, LinearOpMode opmode, Robot robot) {
         this.opmode = opmode;
-        this.robot = robot;
+        //this.robot = robot;
         this.parkingPos = parkingPos;
         this.allianceColor = color;
         switch(this.allianceColor) {
@@ -71,7 +71,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         // Pull foundation into building site
         //driveWithDistanceSensor(0.2, 15.0, DistanceUnit.CM, robot.frontRange);
         while (readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 2.0, 255.0, 10.0) > 8.0) {
-            robot.drive.setDrivePower(0.3);
+            robot.drive.setDrivePower(0.7);
         }
 
         // Debug stuff
@@ -104,7 +104,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         double maxTime; // maximum time for strafe (seconds)
 
         if (parkingPos == ParkingPosition.FAR) {
-            maxTime = 6.2;
+            maxTime = 3.0;
         } else {
             maxTime = 2.0;
         }
