@@ -114,6 +114,7 @@ public class MM_LoadingZoneTemplate {
                 robot.arm.bringArmDown(this.opmode);
                 robot.arm.rotateGripper(1.0);
                 robot.arm.releaseBlock();
+                Thread.sleep(500);
                 this.stepNumber++;
                 break;
             case 2:
@@ -143,7 +144,14 @@ public class MM_LoadingZoneTemplate {
                     case CENTER:
                         distanceToGoBack = 30;
                         distanceToBuildZone = 30;
-                        robot.drive.driveWithDistanceSensor("strafe",29.5, 0.4 * colorCoefficient, robot.leftRange, this.opmode);
+                        switch(allianceColor) {
+                            case RED:
+                                robot.drive.driveWithDistanceSensor("strafe", 29.5, 0.4 * colorCoefficient, robot.leftRange, this.opmode);
+                                break;
+                            case BLUE:
+                                robot.drive.driveWithDistanceSensor("strafe", 28, 0.4 * colorCoefficient, robot.leftRange, this.opmode);
+                                break;
+                        }
                         break;
                     case RIGHT:
                         distanceToGoBack = 30 + (colorCoefficient - 1) * 3;
@@ -170,6 +178,15 @@ public class MM_LoadingZoneTemplate {
             case 4:
                 // back up
                 robot.drive.driveForwardDistance(5, -speed, this.opmode);
+                switch(allianceColor) {
+                    case RED:
+                        switch(skystonePos) {
+                            case RIGHT:
+                                robot.drive.driveForwardDistance(3, -speed, this.opmode);
+                                break;
+                        }
+                        break;
+                }
                 // turn towards skybridge
                 robot.drive.turnToGlobalPosition(0.35, 90 * colorCoefficient, this.opmode);
                 robot.arm.rotateGripper(1.0);
@@ -205,10 +222,25 @@ public class MM_LoadingZoneTemplate {
                         }
                         break;
                     case CENTER:
-                        robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 17, -speed, this.opmode);
+                        switch(allianceColor) {
+                            case RED:
+                                robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 19, -speed, this.opmode);
+                                break;
+                            case BLUE:
+                                robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 17, -speed, this.opmode);
+                                break;
+                        }
                         break;
                     case RIGHT:
-                        robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 19, -speed, this.opmode);
+                        switch(allianceColor) {
+                            case RED:
+                                robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 19, -speed, this.opmode);
+                                break;
+                            case BLUE:
+                                robot.drive.driveForwardDistance(distanceToGoBack + distanceToFoundation + 19, -speed, this.opmode);
+                                robot.drive.strafeTime(-0.4, 500, this.opmode);
+                                break;
+                        }
                 }
                 robot.arm.rotateGripper(1.0);
                 this.stepNumber++;

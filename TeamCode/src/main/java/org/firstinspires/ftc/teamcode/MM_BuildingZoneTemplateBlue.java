@@ -48,7 +48,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         robot.moveWaffleMover(false);
 
         // Go forward to prevent rubbing with wall
-        while (readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 0.0, 255.0) < 60.0) {
+        while (this.opmode.opModeIsActive() && readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 0.0, 255.0) < 60.0) {
             robot.drive.setDrivePower(-speed);
         }
 
@@ -61,7 +61,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
         // Go forward to touch foundation
 
-        while (readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 0.0, 255.0) < 80.0) {
+        while (this.opmode.opModeIsActive() && readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 0.0, 255.0) < 80.0) {
             robot.drive.setDrivePower(-0.2);
         }
 
@@ -70,7 +70,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
         // Pull foundation into building site
         //driveWithDistanceSensor(0.2, 15.0, DistanceUnit.CM, robot.frontRange);
-        while (readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 2.0, 255.0, 10.0) > 8.0) {
+        while (this.opmode.opModeIsActive() && readSensorWithConstraints(robot.frontRange, DistanceUnit.CM, 2.0, 255.0, 10.0) > 8.0) {
             robot.drive.setDrivePower(0.7);
         }
 
@@ -85,7 +85,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
         if (parkingPos == ParkingPosition.CLOSE) {
             robot.drive.setStrafe(-speed * colorCoefficient);
-            while (readSensorWithConstraints(robot.leftRange, DistanceUnit.CM, 0.0, 255.0) < 110.0);
+            while (this.opmode.opModeIsActive() && readSensorWithConstraints(robot.leftRange, DistanceUnit.CM, 0.0, 255.0) < 110.0);
 
             imu.turnToPosition(0.2, initialHeading, imu.LEFT);
             robot.drive.driveForwardDistance(18, -0.4, opmode);
@@ -94,7 +94,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
 
         // Strafe 80 cm, then drive forward 0.5 inch
         robot.drive.setStrafe(-speed * colorCoefficient);
-        while (robot.leftRange.getDistance(DistanceUnit.CM) < 80.0);
+        while (this.opmode.opModeIsActive() && robot.leftRange.getDistance(DistanceUnit.CM) < 80.0);
         robot.drive.driveForwardDistance(0.5, -0.2, this.opmode);
 
         // Set up the fail-safe timer
@@ -110,7 +110,7 @@ public class MM_BuildingZoneTemplateBlue extends DistanceSensorMethods {
         }
 
         // Strafe until detected line
-        while (robot.insideColor.blue() < 4000) {
+        while (this.opmode.opModeIsActive() && robot.insideColor.blue() < 4000) {
             //robot.driveUntilColor("strafe", -speed * colorCoefficient, this.stringColor, opmode); // Michael's code
             // Check timer
             elapsed = System.nanoTime() - startTime;
